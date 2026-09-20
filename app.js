@@ -263,13 +263,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    traveler_persona: title,
-                    selected_transit: transit,
-                    selected_lodging: lodging,
-                    selected_finale: finale,
-                    selected_travelers: travelers,
-                    selected_season: season,
-                    matched_offer: offer,
+                    traveler_persona: title.replace(/–/g, '-'),
+                    selected_transit: transit.replace(/–/g, '-'),
+                    selected_lodging: lodging.replace(/–/g, '-'),
+                    selected_finale: finale.replace(/–/g, '-'),
+                    selected_travelers: travelers.replace(/–/g, '-'),
+                    selected_season: season.replace(/–/g, '-'),
+                    matched_offer: offer.replace(/–/g, '-'),
                 }),
             });
         } catch (err) {
