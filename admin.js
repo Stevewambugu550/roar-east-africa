@@ -1,11 +1,10 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const config = window.ROAR_CONFIG;
+document.addEventListener('DOMContentLoaded', async () => {
+    await window.roarAccount.init();
     const loginPanel = document.getElementById('loginPanel');
     const dashboardPanel = document.getElementById('dashboardPanel');
     const loginError = document.getElementById('loginError');
     const dashboardError = document.getElementById('dashboardError');
     const rows = document.getElementById('leadRows');
-    let token = sessionStorage.getItem('roar_admin_token');
     let leads = [];
 
     const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
@@ -13,36 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusLabels = { new:'New', reviewing:'Reviewing', contacted:'Contacted', proposal_sent:'Proposal sent', won:'Won', lost:'Lost' };
 
     async function signIn(email, password) {
-        const response = await fetch(`${config.apiBase}/auth/login`, {
-            method: 'POST',
-            headers: { 'content-type':'application/json' },
-            body: JSON.stringify({ email, password }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Sign-in failed.');
-        if (data.user?.role !== 'admin') throw new Error('This account is not authorized for the control desk.');
-        token = data.token;
-        sessionStorage.setItem('roar_admin_token', token);
-        sessionStorage.setItem('roar_admin_email', data.user.email || email);
-    }
-
-    async function adminApi(path, method = 'GET', body) {
-        const response = await fetch(`${config.apiBase}${path}`, {
-            method,
-            headers: { authorization: `Bearer ${token}`, 'content-type':'application/json' },
-            body: body ? JSON.stringify(body) : undefined,
-        });
-        const data = await response.json();
-        if (response.status === 401) logout();
-        if (!response.ok) throw new Error(data.message || 'Request failed.');
-        return data;
+        await window.roarAccount.signIn(email, password);
+        if (!window.roarAccount.isAuthenticated()) throw new Error('Sign-in failed.');
+        if (window.roarAccount.profile?.role !== 'admin') throw new Error('This account is not authorized for the control desk.');
     }
 
     async function loadLeads() {
         dashboardError.textContent = '';
         rows.innerHTML = '<tr><td colspan="7" class="empty">Loading briefs…</td></tr>';
         try {
-            leads = (await adminApi('/admin/leads')).leads || [];
+            const { data, error } = await window.roarAccount.supabase
+                .from('roar_leads')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(500);
+            if (error) throw error;
+            leads = data || [];
             render();
         } catch (error) {
             dashboardError.textContent = error.message;
@@ -53,8 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadQuiz() {
         const quizRows = document.getElementById('quizRows');
         try {
-            const data = await adminApi('/admin/quiz');
-            const results = data.results || [];
+            const { data, error } = await window.roarAccount.supabase
+                .from('roar_quiz_results')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(500);
+            if (error) throw error;
+            const results = data || [];
             document.getElementById('metricQuiz').textContent = `${results.length} completion${results.length === 1 ? '' : 's'}`;
             if (!results.length) {
                 quizRows.innerHTML = '<tr><td colspan="8" class="empty">No quiz completions yet.</td></tr>';
@@ -104,9 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
         rows.querySelectorAll('select[data-lead-id]').forEach(select => select.addEventListener('change', async () => {
             select.disabled = true;
             try {
-                const { lead } = await adminApi(`/admin/leads/${encodeURIComponent(select.dataset.leadId)}`, 'PATCH', { status: select.value });
-                const index = leads.findIndex(item => item.id === lead.id);
-                if (index >= 0) leads[index] = lead;
+                const { error } = await window.roarAccount.supabase
+                    .from('roar_leads')
+                    .update({ status: select.value, updated_at: new Date().toISOString() })
+                    .eq('id', select.dataset.leadId)
+                    .select()
+                    .single();
+                if (error) throw error;
+                const index = leads.findIndex(item => item.id === select.dataset.leadId);
+                if (index >= 0) leads[index].status = select.value;
                 render();
             } catch (error) { dashboardError.textContent = error.message; select.disabled = false; }
         }));
@@ -115,20 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function showDashboard() {
         loginPanel.hidden = true;
         dashboardPanel.hidden = false;
-        document.getElementById('adminIdentity').textContent = sessionStorage.getItem('roar_admin_email') || 'Authorized admin';
+        document.getElementById('adminIdentity').textContent = window.roarAccount.user?.email || 'Authorized admin';
         loadLeads();
         loadQuiz();
     }
 
     function logout() {
-        token = null;
-        sessionStorage.removeItem('roar_admin_token');
-        sessionStorage.removeItem('roar_admin_email');
-        dashboardPanel.hidden = true;
-        loginPanel.hidden = false;
+        window.roarAccount.signOut();
     }
 
-    document.getElementById('adminLogin').addEventListener('submit', async event => {
+    document.getElementById('adminLogin').addEventListener('submit', async (event) => {
         event.preventDefault();
         loginError.textContent = '';
         try {
@@ -141,5 +133,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('statusFilter').addEventListener('change', render);
     document.getElementById('leadSearch').addEventListener('input', render);
 
-    if (token) showDashboard();
+    if (window.roarAccount.isAuthenticated() && window.roarAccount.profile?.role === 'admin') showDashboard();
 });

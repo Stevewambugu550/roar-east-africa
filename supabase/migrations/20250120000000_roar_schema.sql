@@ -1,19 +1,14 @@
--- Roar East Africa backend schema for Supabase
--- This migration creates the isolated tables used by the Roar API.
+-- Roar East Africa Supabase-native schema
+-- Uses Supabase Auth for accounts and Row Level Security for data protection.
 
--- Customers / admin accounts
+-- Customer profiles mirror auth.users
 CREATE TABLE IF NOT EXISTS public.roar_customers (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    email text NOT NULL UNIQUE,
-    password_hash text NOT NULL,
+    id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email text NOT NULL,
     first_name text NOT NULL,
     last_name text NOT NULL,
     role text NOT NULL DEFAULT 'customer' CHECK (role IN ('customer','admin')),
-    email_verified boolean NOT NULL DEFAULT false,
-    verification_token_hash text,
-    verification_expires_at timestamptz,
-    created_at timestamptz NOT NULL DEFAULT now(),
-    updated_at timestamptz NOT NULL DEFAULT now()
+    created_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- Safari inquiries / leads
@@ -39,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.roar_leads (
 );
 
 CREATE INDEX IF NOT EXISTS roar_leads_customer_idx ON public.roar_leads(customer_id);
+CREATE INDEX IF NOT EXISTS roar_leads_created_idx ON public.roar_leads(created_at DESC);
 
 -- First-five launch offer claims
 CREATE TABLE IF NOT EXISTS public.roar_launch_claims (
@@ -59,12 +55,112 @@ CREATE TABLE IF NOT EXISTS public.roar_quiz_results (
     selected_travelers text CHECK (char_length(selected_travelers) <= 80),
     selected_season text CHECK (char_length(selected_season) <= 80),
     matched_offer text CHECK (char_length(matched_offer) <= 80),
-    source_ip inet,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Enable RLS; the Edge Function uses the service-role key, so policies are optional.
+-- Function to auto-create a customer profile when Supabase Auth signs a user up
+CREATE OR REPLACE FUNCTION public.handle_new_roar_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.roar_customers (id, email, first_name, last_name, role)
+    VALUES (
+        NEW.id,
+        NEW.email,
+        COALESCE(NEW.raw_user_meta_data->>'first_name', ''),
+        COALESCE(NEW.raw_user_meta_data->>'last_name', ''),
+        'customer'
+    )
+    ON CONFLICT (id) DO NOTHING;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_roar_user();
+
+-- Public promotion status RPC
+CREATE OR REPLACE FUNCTION public.roar_promotion_status()
+RETURNS json AS $$
+DECLARE
+    claimed_count integer;
+BEGIN
+    SELECT COUNT(*)::int INTO claimed_count FROM public.roar_launch_claims;
+    RETURN json_build_object(
+        'total', 5,
+        'claimed', claimed_count,
+        'remaining', GREATEST(0, 5 - claimed_count),
+        'discountPercent', 10
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.roar_promotion_status() TO anon;
+GRANT EXECUTE ON FUNCTION public.roar_promotion_status() TO authenticated;
+
+-- Enable RLS
 ALTER TABLE public.roar_customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.roar_leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.roar_launch_claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.roar_quiz_results ENABLE ROW LEVEL SECURITY;
+
+-- Drop any old policies before recreating
+DROP POLICY IF EXISTS roar_customers_own ON public.roar_customers;
+DROP POLICY IF EXISTS roar_customers_admin ON public.roar_customers;
+DROP POLICY IF EXISTS roar_leads_insert_own ON public.roar_leads;
+DROP POLICY IF EXISTS roar_leads_select_own ON public.roar_leads;
+DROP POLICY IF EXISTS roar_leads_admin_all ON public.roar_leads;
+DROP POLICY IF EXISTS roar_quiz_public_insert ON public.roar_quiz_results;
+DROP POLICY IF EXISTS roar_quiz_admin_select ON public.roar_quiz_results;
+DROP POLICY IF EXISTS roar_claims_admin_select ON public.roar_launch_claims;
+
+-- Helper: is the current user a Roar admin?
+CREATE OR REPLACE FUNCTION public.is_roar_admin()
+RETURNS boolean AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.roar_customers
+        WHERE id = auth.uid() AND role = 'admin'
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION public.is_roar_admin() TO authenticated;
+
+-- Policies
+CREATE POLICY roar_customers_own ON public.roar_customers
+    FOR SELECT TO authenticated
+    USING (id = auth.uid());
+
+CREATE POLICY roar_customers_admin ON public.roar_customers
+    FOR ALL TO authenticated
+    USING (public.is_roar_admin())
+    WITH CHECK (public.is_roar_admin());
+
+CREATE POLICY roar_leads_insert_own ON public.roar_leads
+    FOR INSERT TO authenticated
+    WITH CHECK (customer_id = auth.uid());
+
+CREATE POLICY roar_leads_select_own ON public.roar_leads
+    FOR SELECT TO authenticated
+    USING (customer_id = auth.uid() OR public.is_roar_admin());
+
+CREATE POLICY roar_leads_admin_update ON public.roar_leads
+    FOR UPDATE TO authenticated
+    USING (public.is_roar_admin())
+    WITH CHECK (public.is_roar_admin());
+
+CREATE POLICY roar_quiz_public_insert ON public.roar_quiz_results
+    FOR INSERT TO anon, authenticated
+    WITH CHECK (true);
+
+CREATE POLICY roar_quiz_admin_select ON public.roar_quiz_results
+    FOR SELECT TO authenticated
+    USING (public.is_roar_admin());
+
+CREATE POLICY roar_claims_admin_select ON public.roar_launch_claims
+    FOR SELECT TO authenticated
+    USING (public.is_roar_admin());
+
+-- Allow the Supabase service role / triggers full access is implicit for service role.
