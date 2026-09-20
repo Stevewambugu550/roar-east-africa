@@ -91,3 +91,125 @@
 #radar-species li:nth-child(2){animation-delay:.2s}
 #radar-species li:nth-child(3){animation-delay:.3s}
 @media(prefers-reduced-motion:reduce){.animate-fade-up,.animate-metric,#radar-species li{animation:none;opacity:1}}
+
+/* Premium layout corrections */
+.builder-section,
+.calculator-section,
+.planner-section,
+.leadership-section {
+    padding: 100px 8%;
+}
+
+.calculator-box {
+    background: #fff;
+    border: 1px solid #eaddca;
+    border-radius: 8px;
+    padding: 50px 6%;
+    margin: 60px auto;
+    max-width: 1000px;
+    box-shadow: 0 20px 50px rgba(21, 29, 22, 0.04);
+}
+
+.calc-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.calc-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.calc-field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 10px;
+}
+
+.builder-circuit-box {
+    background: #fdfbf7 !important;
+    border-top: 1px solid #f0ecdf;
+    border-bottom: 1px solid #f0ecdf;
+    padding: 80px 8% !important;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.circuit-chip {
+    background: #fff;
+    border: 1px solid #dcd7ca;
+    padding: 15px 25px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px;
+    border-radius: 4px;
+}
+
+.circuit-chip:hover,
+.circuit-chip.selected {
+    background: #151d16;
+    color: #fff;
+    border-color: #151d16;
+}
+
+.circuit-chip:hover i,
+.circuit-chip.selected i {
+    color: #d4af37;
+}
+
+.planner-form-box input,
+.planner-form-box select,
+.planner-form-box textarea,
+.calculator-box select {
+    width: 100%;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #dcd7ca;
+    color: #151d16;
+    font-size: 14.5px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+
+.planner-form-box input:focus,
+.planner-form-box select:focus,
+.planner-form-box textarea:focus,
+.calculator-box select:focus {
+    border-color: #d4af37;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.leadership-section {
+    background: #fdfbf7;
+    border-top: 1px solid #f0ecdf;
+    border-bottom: 1px solid #f0ecdf;
+}
+
+@media (max-width: 768px) {
+    .calc-row,
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .builder-section,
+    .calculator-section,
+    .planner-section,
+    .leadership-section {
+        padding: 60px 5%;
+    }
+    .calculator-box {
+        padding: 30px 5%;
+    }
+}
