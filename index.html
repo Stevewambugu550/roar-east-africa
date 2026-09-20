@@ -113,11 +113,50 @@
             <div class="calc-field"><label for="calcSeason">Travel season</label><select id="calcSeason"><option value="1.3" data-name="Peak Migration (July–October)">Peak Migration: July–October (+30%)</option><option value="1" data-name="Regular Peak (January–March)" selected>Regular Peak: January–March</option><option value="0.85" data-name="Green Season (April–June)">Green Season: April–June (−15%)</option></select></div>
             <div class="calc-field"><label for="calcAddon">Optional experience</label><select id="calcAddon"><option value="0" data-name="No optional add-ons" selected>No extras</option><option value="450" data-name="Mara hot-air balloon flight">Hot-air balloon flight (+$450 pp)</option><option value="150" data-name="Private Maasai cultural visit">Private Maasai cultural visit (+$150 pp)</option><option value="600" data-name="Balloon flight and cultural visit">Both premium add-ons (+$600 pp)</option></select></div>
           </div>
+          <div class="calc-row">
+            <div class="calc-field"><label for="calcOffer">Apply an offer</label><select id="calcOffer"><option value="none" data-discount="0" data-name="Standard estimate" selected>Standard estimate</option><option value="launch10" data-discount="10" data-name="Founder's Launch Rate (10% off)">Founder's Launch Rate — 10% off</option><option value="honeymoon25" data-discount="25" data-name="Honeymoon & Celebration (25% off total)">Honeymoon & Celebration — 25% off total</option><option value="group10" data-discount="10" data-name="Group of 6+ (10% off total)">Group of 6+ — 10% off total</option></select></div>
+          </div>
           <div class="calc-display" aria-live="polite"><div class="display-metric"><small>Estimated price per person</small><h4 id="perPersonPrice">$2,950</h4></div><div class="display-divider"></div><div class="display-metric"><small>Estimated group total</small><h2 id="totalGroupPrice">$5,900</h2></div></div>
           <p style="color:#a36a3e;font-size:12px;margin-top:12px"><i class="fa-solid fa-star" style="color:#d4af37;margin-right:6px"></i>Founder's launch rates — introductory pricing for our first season.</p>
           <p class="calc-disclaimer">Planning estimate only. Final pricing depends on dates, availability, room configuration, park fees, and confirmed services.</p>
           <div class="calc-action"><a href="#planner" id="useEstimateBtn" class="btn-submit">Use This Estimate in My Inquiry <i class="fa-solid fa-arrow-right"></i></a></div>
         </div>
+      </div>
+    </section>
+
+    <section id="special-offers" class="offers-section" style="padding:100px 6%;background:#fff">
+      <style>
+        .offers-section .section-header { text-align:center; max-width:760px; margin:0 auto 55px }
+        .offers-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:22px; max-width:1200px; margin:0 auto }
+        .offer-card { background:#f8f4ec; border:1px solid rgba(0,0,0,.05); padding:28px; border-radius:4px }
+        .offer-icon { color:#d4af37; font-size:22px; margin-bottom:14px }
+        .offer-card h3 { font-family:var(--font-serif); font-size:22px; margin-bottom:10px; color:#151d16 }
+        .offer-card p { color:#6b6861; font-size:13px; line-height:1.65 }
+        .offer-card strong { color:#151d16 }
+        .offers-compare { max-width:1200px; margin:55px auto 0; overflow-x:auto }
+        .offers-compare table { width:100%; border-collapse:collapse; font-size:13px }
+        .offers-compare th, .offers-compare td { padding:14px 16px; text-align:left; border-bottom:1px solid #e8e0d3 }
+        .offers-compare th { background:#151d16; color:#fff; font-weight:600 }
+        .offers-compare td { color:#6b6861 }
+      </style>
+      <div class="section-header"><span class="sub">Current Launch Offers</span><h2>More value, less complexity</h2><p>Competitive founder-season rates designed to match the market while you experience private, Kenya-led safari planning.</p></div>
+      <div class="offers-grid">
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-ticket"></i></div><h3>Founder's Launch Rate</h3><p>Our first <strong>5 confirmed bookings</strong> receive <strong>10% off</strong> eligible safari services. No code needed — we apply it at confirmation.</p></article>
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-heart"></i></div><h3>Honeymoon &amp; Celebration</h3><p>One partner receives <strong>50% off</strong> the safari rate (25% off the couple's total), plus a complimentary private bush dinner when available.</p></article>
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-people-roof"></i></div><h3>Family Safari</h3><p>Children <strong>under 12</strong> sharing with parents get <strong>50% off</strong>. Family tents, flexible drive times, and a meet-and-greet at the airport.</p></article>
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-users"></i></div><h3>Group of 6+</h3><p>Private group departures save <strong>10% off</strong> the total itinerary cost. Your own vehicle, your own pace.</p></article>
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-leaf"></i></div><h3>Green Season Escape</h3><p>Travel <strong>April–June</strong> and save up to <strong>15% on lodge rates</strong>, with fewer vehicles and lush landscapes. Includes a complimentary cultural visit.</p></article>
+        <article class="offer-card"><div class="offer-icon"><i class="fa-solid fa-binoculars"></i></div><h3>Early Bird Migration</h3><p>Book <strong>6+ months</strong> ahead for July–October travel and receive priority guide/camp allocation plus a <strong>free hot-air balloon flight</strong> per couple.</p></article>
+      </div>
+      <div class="offers-compare">
+        <table>
+          <thead><tr><th>Market comparison (per person, 7-day private safari)</th><th>Typical operator range</th><th>Roar East Africa starting estimate</th></tr></thead>
+          <tbody>
+            <tr><td>Budget / shared vehicle</td><td>$1,800 – $2,800</td><td>Private journeys only</td></tr>
+            <tr><td>Mid-range private</td><td>$3,200 – $4,800</td><td>From <strong>$2,950</strong></td></tr>
+            <tr><td>Luxury / fly-in</td><td>$6,000 – $10,000+</td><td>Premium boutique from <strong>$4,200</strong></td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 

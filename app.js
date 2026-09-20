@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcGuests  = document.getElementById('calcGuests');
     const calcSeason  = document.getElementById('calcSeason');
     const calcAddon   = document.getElementById('calcAddon');
+    const calcOffer   = document.getElementById('calcOffer');
     const perPersonDisplay = document.getElementById('perPersonPrice');
     const totalGroupDisplay = document.getElementById('totalGroupPrice');
     let currentEstimate = null;
@@ -84,8 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const seasonalMultiplier = Number(calcSeason.value);
         const experienceAddon = Number(calcAddon.value);
         const singleSupplement = totalGuests === 1 ? 650 : 0;
-        const perPerson = Math.round(basePrice * seasonalMultiplier + experienceAddon + singleSupplement);
-        const groupTotal = perPerson * totalGuests;
+        const offerPercent = calcOffer ? Number(calcOffer.selectedOptions[0]?.dataset.discount || 0) : 0;
+        const rawPerPerson = Math.round(basePrice * seasonalMultiplier + experienceAddon + singleSupplement);
+        const rawGroupTotal = rawPerPerson * totalGuests;
+        const discountAmount = Math.round(rawGroupTotal * (offerPercent / 100));
+        const groupTotal = rawGroupTotal - discountAmount;
+        const perPerson = totalGuests > 0 ? Math.round(groupTotal / totalGuests) : rawPerPerson;
         const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
         perPersonDisplay.textContent = currency.format(perPerson);
         totalGroupDisplay.textContent = currency.format(groupTotal);
@@ -94,12 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
             guests: totalGuests,
             season: calcSeason.selectedOptions[0].dataset.name,
             addon: calcAddon.selectedOptions[0].dataset.name,
+            offer: calcOffer ? calcOffer.selectedOptions[0].dataset.name : 'Standard estimate',
             perPerson,
             groupTotal,
+            discountAmount,
         };
     }
 
-    [calcPackage, calcGuests, calcSeason, calcAddon].filter(Boolean).forEach(field => {
+    [calcPackage, calcGuests, calcSeason, calcAddon, calcOffer].filter(Boolean).forEach(field => {
         field.addEventListener('change', calculateSafariRates);
     });
     calculateSafariRates();
@@ -110,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const guests = document.getElementById('guestCount');
         if (guests) guests.value = currentEstimate.guests;
         if (notes) {
-            const estimate = `Planning estimate: ${currentEstimate.packageName}; ${currentEstimate.season}; ${currentEstimate.addon}; $${currentEstimate.perPerson.toLocaleString()} per person / $${currentEstimate.groupTotal.toLocaleString()} group total.`;
+            let estimate = `Planning estimate: ${currentEstimate.packageName}; ${currentEstimate.season}; ${currentEstimate.addon}; ${currentEstimate.offer}; $${currentEstimate.perPerson.toLocaleString()} per person / $${currentEstimate.groupTotal.toLocaleString()} group total.`;
+            if (currentEstimate.discountAmount) estimate += ` (Includes $${currentEstimate.discountAmount.toLocaleString()} estimated discount).`;
             notes.value = notes.value ? `${notes.value}\n${estimate}` : estimate;
         }
     });
