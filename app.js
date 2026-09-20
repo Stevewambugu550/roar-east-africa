@@ -204,4 +204,75 @@ document.addEventListener('DOMContentLoaded', () => {
             formBox.style.opacity = '1';
         }, 280);
     });
+
+    // Safari persona quiz
+    const quizData = [
+        { q: 'How do you prefer to travel between parks?', a: [{ t: 'Short scenic flights and more time on the ground', v: 'fly' }, { t: 'Private 4×4 road journeys through the landscapes', v: 'road' }] },
+        { q: 'Which accommodation mood suits you?', a: [{ t: 'Glass-fronted suites with private plunge pools', v: 'lodge' }, { t: 'Intimate canvas tents with campfire evenings', v: 'camp' }] },
+        { q: 'What is your ideal safari finale?', a: [{ t: 'A few barefoot days on a quiet Indian Ocean beach', v: 'beach' }, { t: 'More wildlife, culture, and conservation time inland', v: 'bush' }] },
+    ];
+    let currentQ = 0;
+    const scores = { fly: 0, road: 0, lodge: 0, camp: 0, beach: 0, bush: 0 };
+
+    document.getElementById('startQuizBtn')?.addEventListener('click', () => {
+        document.getElementById('quiz-intro').style.display = 'none';
+        document.getElementById('quiz-window').style.display = 'block';
+        currentQ = 0;
+        for (const k of Object.keys(scores)) scores[k] = 0;
+        renderQuestion();
+    });
+
+    function renderQuestion() {
+        document.getElementById('quiz-question').textContent = quizData[currentQ].q;
+        const optionsBox = document.getElementById('quiz-options');
+        optionsBox.innerHTML = '';
+        quizData[currentQ].a.forEach((opt) => {
+            const btn = document.createElement('button');
+            btn.textContent = opt.t;
+            btn.style.cssText = 'padding:15px;background:#fdfbf7;border:1px solid #dcd7ca;text-align:left;cursor:pointer;font-weight:500;font-size:14px;color:#151d16;border-radius:2px;transition:background .15s,border-color .15s';
+            btn.addEventListener('mouseenter', () => { btn.style.background = '#f8f4ec'; btn.style.borderColor = '#d4af37'; });
+            btn.addEventListener('mouseleave', () => { btn.style.background = '#fdfbf7'; btn.style.borderColor = '#dcd7ca'; });
+            btn.addEventListener('click', () => {
+                scores[opt.v]++;
+                currentQ++;
+                if (currentQ < quizData.length) renderQuestion();
+                else showQuizResult();
+            });
+            optionsBox.appendChild(btn);
+        });
+    }
+
+    function showQuizResult() {
+        const windowBox = document.getElementById('quiz-window');
+        const preferFly = scores.fly >= scores.road;
+        const preferLodge = scores.lodge >= scores.camp;
+        const preferBeach = scores.beach >= scores.bush;
+        let title, text, cta, target;
+        if (preferFly && preferBeach) {
+            title = 'Sky Safari & Indian Ocean Escape';
+            text = 'You value time, aerial perspective, and a rewarding beach finale — our 10-day Bush & Surf journey is built around you.';
+            cta = 'Inspect the Grand Savanna & Diani Waters';
+            target = '#itineraries';
+        } else if (preferFly || preferLodge) {
+            title = 'Sky Safari Connoisseur';
+            text = 'You gravitate toward premium camps, fly-in logistics, and concentrated wildlife access — our 7-day Sky Safari & Mara Migration fits perfectly.';
+            cta = 'Inspect the Sky Safari & Mara Package';
+            target = '#itineraries';
+        } else if (preferBeach) {
+            title = 'Classic Explorer with a Beach Finale';
+            text = 'You want authentic road safari rhythm followed by ocean downtime — the Grand Savanna & Diani Waters route is your match.';
+            cta = 'Inspect the Grand Savanna Circuit';
+            target = '#itineraries';
+        } else {
+            title = 'Classic Explorer';
+            text = 'You favor raw, immersive wildlife time, culture, and open-vehicle photography — the Sky Safari can be customised with longer road sectors for you.';
+            cta = 'Start Planning Your Classic Safari';
+            target = '#planner';
+        }
+        windowBox.innerHTML = `<div style="text-align:center;padding:10px 0">
+            <h3 style="font-family:Cormorant Garamond,serif;font-size:28px;color:#151d16;margin-bottom:12px">You profile as a: ${title}</h3>
+            <p style="color:#6b6861;font-size:15px;line-height:1.6;margin:0 0 25px">${text}</p>
+            <a href="${target}" class="btn-nav" style="text-decoration:none">${cta}</a>
+        </div>`;
+    }
 });
