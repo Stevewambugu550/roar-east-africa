@@ -210,9 +210,21 @@ document.addEventListener('DOMContentLoaded', () => {
         { q: 'How do you prefer to travel between parks?', a: [{ t: 'Short scenic flights and more time on the ground', v: 'fly' }, { t: 'Private 4×4 road journeys through the landscapes', v: 'road' }] },
         { q: 'Which accommodation mood suits you?', a: [{ t: 'Glass-fronted suites with private plunge pools', v: 'lodge' }, { t: 'Intimate canvas tents with campfire evenings', v: 'camp' }] },
         { q: 'What is your ideal safari finale?', a: [{ t: 'A few barefoot days on a quiet Indian Ocean beach', v: 'beach' }, { t: 'More wildlife, culture, and conservation time inland', v: 'bush' }] },
+        { q: 'Who are you traveling with?', a: [
+            { t: 'Solo adventurer', v: 'solo' },
+            { t: 'Couple or celebration', v: 'couple' },
+            { t: 'Family with children', v: 'family' },
+            { t: 'Group of friends / colleagues', v: 'group' },
+        ] },
+        { q: 'When are you hoping to travel?', a: [
+            { t: 'July–October Great Migration peak', v: 'peak' },
+            { t: 'January–March calving / shoulder season', v: 'shoulder' },
+            { t: 'April–June green season', v: 'green' },
+            { t: 'November–December short rains', v: 'shortrains' },
+        ] },
     ];
     let currentQ = 0;
-    const scores = { fly: 0, road: 0, lodge: 0, camp: 0, beach: 0, bush: 0 };
+    const scores = { fly: 0, road: 0, lodge: 0, camp: 0, beach: 0, bush: 0, solo: 0, couple: 0, family: 0, group: 0, peak: 0, shoulder: 0, green: 0, shortrains: 0 };
     let selectedAnswers = [];
 
     document.getElementById('startQuizBtn')?.addEventListener('click', () => {
@@ -245,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function recordQuizResult(title, transit, lodging, finale) {
+    async function recordQuizResult(title, transit, lodging, finale, travelers, season, offer) {
         try {
             await fetch(`${window.ROAR_CONFIG.apiBase}/quiz`, {
                 method: 'POST',
@@ -255,11 +267,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     selected_transit: transit,
                     selected_lodging: lodging,
                     selected_finale: finale,
+                    selected_travelers: travelers,
+                    selected_season: season,
+                    matched_offer: offer,
                 }),
             });
         } catch (err) {
             console.error('Quiz tracking failed:', err);
         }
+    }
+
+    function pickMatchedOffer() {
+        const companion = Object.entries({ couple: scores.couple, family: scores.family, group: scores.group, solo: scores.solo })
+            .sort((a, b) => b[1] - a[1])[0][0];
+        const season = Object.entries({ peak: scores.peak, shoulder: scores.shoulder, green: scores.green, shortrains: scores.shortrains })
+            .sort((a, b) => b[1] - a[1])[0][0];
+        const offers = {
+            couple: { label: "Honeymoon & Celebration", desc: "One partner receives 50% off the safari rate (25% off the couple's total), plus a private bush dinner when available.", cta: "Claim the Celebration Offer", target: "#special-offers" },
+            family: { label: "Family Safari", desc: "Children under 12 sharing with parents receive 50% off. Family tents, flexible drives, and airport meet-and-greet included.", cta: "Claim the Family Offer", target: "#special-offers" },
+            group: { label: "Group of 6+", desc: "Private group departures save 10% off the total itinerary. Your own vehicle, your own pace.", cta: "Claim the Group Offer", target: "#special-offers" },
+            solo: { label: "Solo-Friendly Planning", desc: "No single-supplement stress on selected dates. We pair you with the right guide and camp setup.", cta: "Plan a Solo Safari", target: "#planner" },
+        };
+        let offer = offers[companion];
+        if (season === 'green') {
+            offer = { label: "Green Season Escape", desc: "April–June travel saves up to 15% on lodge rates, with fewer vehicles and lush landscapes. Includes a complimentary cultural visit.", cta: "Claim the Green Season Offer", target: "#special-offers" };
+        }
+        return { personaCompanion: companion, personaSeason: season, ...offer };
     }
 
     function showQuizResult() {
@@ -289,11 +322,25 @@ document.addEventListener('DOMContentLoaded', () => {
             cta = 'Start Planning Your Classic Safari';
             target = '#planner';
         }
-        recordQuizResult(title, selectedAnswers[0], selectedAnswers[1], selectedAnswers[2]);
+        const offer = pickMatchedOffer();
+        const calcOffer = document.getElementById('calcOffer');
+        if (calcOffer) {
+            const map = { 'Honeymoon & Celebration': 'honeymoon25', 'Family Safari': 'launch10', 'Group of 6+': 'group10', 'Green Season Escape': 'none', 'Solo-Friendly Planning': 'none' };
+            if (map[offer.label]) {
+                calcOffer.value = map[offer.label];
+                if (typeof calculateSafariRates === 'function') calculateSafariRates();
+            }
+        }
+        recordQuizResult(title, selectedAnswers[0], selectedAnswers[1], selectedAnswers[2], selectedAnswers[3], selectedAnswers[4], offer.label);
         windowBox.innerHTML = `<div style="text-align:center;padding:10px 0">
             <h3 style="font-family:Cormorant Garamond,serif;font-size:28px;color:#151d16;margin-bottom:12px">You profile as a: ${title}</h3>
-            <p style="color:#6b6861;font-size:15px;line-height:1.6;margin:0 0 25px">${text}</p>
-            <a href="${target}" class="btn-nav" style="text-decoration:none">${cta}</a>
+            <p style="color:#6b6861;font-size:15px;line-height:1.6;margin:0 0 20px">${text}</p>
+            <div style="background:#f8f4ec;border:1px solid #e8e0d3;border-radius:4px;padding:22px;margin:0 0 25px;text-align:left">
+                <h4 style="font-family:var(--font-serif),serif;color:#a36a3e;font-size:20px;margin-bottom:8px">Recommended offer: ${offer.label}</h4>
+                <p style="color:#6b6861;font-size:13.5px;line-height:1.6;margin:0 0 15px">${offer.desc}</p>
+                <a href="${offer.target}" class="btn-nav" style="text-decoration:none">${offer.cta}</a>
+            </div>
+            <a href="${target}" class="btn-nav" style="text-decoration:none;background:transparent;border:1px solid #151d16;color:#151d16">${cta}</a>
         </div>`;
     }
 });

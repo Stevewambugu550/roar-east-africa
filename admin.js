@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const results = data.results || [];
             document.getElementById('metricQuiz').textContent = `${results.length} completion${results.length === 1 ? '' : 's'}`;
             if (!results.length) {
-                quizRows.innerHTML = '<tr><td colspan="5" class="empty">No quiz completions yet.</td></tr>';
+                quizRows.innerHTML = '<tr><td colspan="8" class="empty">No quiz completions yet.</td></tr>';
                 return;
             }
             quizRows.innerHTML = results.slice(0, 100).map(r => `<tr>
@@ -66,9 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${escapeHtml(r.selected_transit || '—')}</td>
                 <td>${escapeHtml(r.selected_lodging || '—')}</td>
                 <td>${escapeHtml(r.selected_finale || '—')}</td>
+                <td>${escapeHtml(r.selected_travelers || '—')}</td>
+                <td>${escapeHtml(r.selected_season || '—')}</td>
+                <td>${escapeHtml(r.matched_offer || '—')}</td>
             </tr>`).join('');
         } catch (error) {
-            quizRows.innerHTML = '<tr><td colspan="5" class="empty">Quiz data unavailable.</td></tr>';
+            quizRows.innerHTML = '<tr><td colspan="8" class="empty">Quiz data unavailable.</td></tr>';
         }
     }
 
