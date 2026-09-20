@@ -71,8 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calcPackage = document.getElementById('calcPackage');
     const calcGuests  = document.getElementById('calcGuests');
-    const calcGuestsOther = document.getElementById('calcGuestsOther');
-    const travelerChips = document.getElementById('travelerChips');
     const calcSeason  = document.getElementById('calcSeason');
     const calcAddon   = document.getElementById('calcAddon');
     const calcOffer   = document.getElementById('calcOffer');
@@ -84,29 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEstimate = null;
 
     function getTotalGuests() {
-        const other = calcGuestsOther ? Number(calcGuestsOther.value) : 0;
-        if (other > 0) return Math.min(other, 100);
-        return calcGuests ? Number(calcGuests.value) || 2 : 2;
-    }
-
-    function selectTravelerChip(value) {
-        if (!travelerChips) return;
-        travelerChips.querySelectorAll('button[data-value]').forEach(btn => btn.classList.toggle('active', btn.dataset.value === String(value)));
-        if (calcGuests) calcGuests.value = value;
-        if (calcGuestsOther) calcGuestsOther.value = '';
-    }
-
-    if (travelerChips) {
-        travelerChips.querySelectorAll('button[data-value]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                selectTravelerChip(btn.dataset.value);
-                calculateSafariRates();
-            });
-        });
-        calcGuestsOther?.addEventListener('input', () => {
-            travelerChips.querySelectorAll('button[data-value]').forEach(btn => btn.classList.remove('active'));
-            calculateSafariRates();
-        });
+        return Math.min(Math.max(Number(calcGuests?.value) || 2, 1), 100);
     }
 
     const customNightlyRates = {
@@ -180,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     [calcPackage, calcGuests, calcSeason, calcAddon, calcOffer, calcCustomTier].filter(Boolean).forEach(field => {
-        field.addEventListener('change', () => { toggleCustomFields(); calculateSafariRates(); });
+        const eventType = field.tagName === 'INPUT' ? 'input' : 'change';
+        field.addEventListener(eventType, () => { toggleCustomFields(); calculateSafariRates(); });
     });
     document.querySelectorAll('#customOptions input[type="number"]').forEach(input => {
         input.addEventListener('input', calculateSafariRates);
