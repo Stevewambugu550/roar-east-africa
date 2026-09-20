@@ -25,3 +25,18 @@
 .btn-bundle:hover{background:var(--forest);color:var(--white)}
 .btn-bundle-gold{background:var(--gold);color:var(--forest);border:1px solid var(--gold)}
 .btn-bundle-gold:hover{background:var(--white);color:var(--forest)}
+
+/* Interactive Wildlife Radar */
+.radar-btn{background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);padding:12px 28px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .3s;border-radius:2px}
+.radar-btn:hover{border-color:#d4af37;color:#fff}
+.active-radar{background:#d4af37!important;color:#151d16!important;border-color:#d4af37!important}
+
+/* Dynamic Circuit Builder */
+.builder-circuit-box{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:4px;padding:40px;max-width:900px;margin:0 auto;box-shadow:0 20px 40px rgba(0,0,0,.02)}
+.chip-flex{display:flex;gap:15px;flex-wrap:wrap;margin:20px 0 35px}
+.circuit-chip{background:#fdfbf7;border:1px solid #dcd7ca;padding:14px 22px;font-size:14px;font-weight:500;cursor:pointer;border-radius:2px;transition:all .3s;user-select:none}
+.circuit-chip i{margin-right:8px;color:#a36a3e}
+.circuit-chip.selected{background:#151d16;color:#fff;border-color:#151d16}
+.circuit-chip.selected i{color:#d4af37}
+
+@media(max-width:768px){#radar-panel{grid-template-columns:1fr;gap:30px}}

@@ -370,4 +370,73 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof calculateSafariRates === 'function') calculateSafariRates();
         });
     });
+
+    // Seasonal wildlife radar
+    const radarData = {
+        mara: {
+            title: 'Maasai Mara National Reserve',
+            desc: 'Peak predator viewing and the Great Migration river crossings from July to October. Big cats remain excellent year-round across the conservancies.',
+            cats: 'Excellent',
+            herds: 'Mega herds Jul–Oct',
+            species: ['Black-maned lion coalitions', 'Cheetah along riverine corridors', 'Wildebeest & zebra crossings'],
+        },
+        amboseli: {
+            title: 'Amboseli Plains',
+            desc: 'Elephant herds concentrate around central swamps beneath Kilimanjaro. Strong photography conditions, especially at dawn and dusk.',
+            cats: 'Moderate',
+            herds: 'Dense elephant groups',
+            species: ['Matriarch elephant herds', 'Spotted hyena clans', 'Burchell\'s zebra & wildebeest'],
+        },
+        samburu: {
+            title: 'Samburu Arid Corridor',
+            desc: 'Dry-country special species gather along the Ewaso Nyiro River. Leopard sightings are reliable in riverine trees.',
+            cats: 'Good',
+            herds: 'Streamed riverine groups',
+            species: ['Reticulated giraffe', 'Grevy\'s zebra', 'Leopard in canopy shade'],
+        },
+    };
+
+    function renderRadar(regionKey) {
+        const data = radarData[regionKey];
+        if (!data) return;
+        document.querySelectorAll('.radar-btn').forEach((btn) => btn.classList.toggle('active-radar', btn.dataset.radar === regionKey));
+        document.getElementById('radar-title').textContent = data.title;
+        document.getElementById('radar-desc').textContent = data.desc;
+        document.getElementById('stat-cats').textContent = data.cats;
+        document.getElementById('stat-herds').textContent = data.herds;
+        const speciesBox = document.getElementById('radar-species');
+        speciesBox.innerHTML = data.species.map((sp) => `<li><i class="fa-solid fa-paw" style="color:#d4af37;margin-right:10px"></i> ${sp}</li>`).join('');
+    }
+
+    document.querySelectorAll('.radar-btn').forEach((btn) => {
+        btn.addEventListener('click', () => renderRadar(btn.dataset.radar));
+    });
+
+    // Dynamic multi-destination circuit builder
+    let selectedCircuitDestinations = [];
+    const costPerDestinationBlock = 1200;
+
+    function updateCircuitBuilder() {
+        const summary = document.getElementById('circuitSummaryTotal');
+        const total = selectedCircuitDestinations.length * costPerDestinationBlock;
+        if (summary) summary.textContent = total > 0 ? `$${total.toLocaleString()}` : '$0';
+
+        const notes = document.getElementById('clientNotes');
+        if (notes && selectedCircuitDestinations.length > 0) {
+            notes.value = `[CUSTOM CIRCUIT SELECTED]: Preferred chained route: ${selectedCircuitDestinations.join(' → ')}.\n\nAdditional trip preferences: `;
+        }
+    }
+
+    document.querySelectorAll('[data-circuit]').forEach((chip) => {
+        chip.addEventListener('click', () => {
+            chip.classList.toggle('selected');
+            const name = chip.dataset.circuit;
+            if (chip.classList.contains('selected')) {
+                if (!selectedCircuitDestinations.includes(name)) selectedCircuitDestinations.push(name);
+            } else {
+                selectedCircuitDestinations = selectedCircuitDestinations.filter((item) => item !== name);
+            }
+            updateCircuitBuilder();
+        });
+    });
 });
