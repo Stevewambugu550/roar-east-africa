@@ -343,4 +343,31 @@ document.addEventListener('DOMContentLoaded', () => {
             <a href="${target}" class="btn-nav" style="text-decoration:none;background:transparent;border:1px solid #151d16;color:#151d16">${cta}</a>
         </div>`;
     }
+
+    // Premium bundle selection — fills planner notes and pre-sets estimate
+    document.querySelectorAll('[data-bundle]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            const bundleName = btn.dataset.bundle;
+            const notes = document.getElementById('clientNotes');
+            if (notes) {
+                notes.value = `[SELECTED BUNDLE]: I would like to lock in and apply the premium "${bundleName}" inclusions to this custom safari brief.\n\nAdditional trip preferences: `;
+                notes.style.borderColor = '#d4af37';
+                notes.style.backgroundColor = 'rgba(212,175,55,0.05)';
+                setTimeout(() => { notes.style.backgroundColor = ''; notes.style.borderColor = ''; }, 1500);
+            }
+            const calcOffer = document.getElementById('calcOffer');
+            const calcPackage = document.getElementById('calcPackage');
+            if (bundleName.includes('Romance')) {
+                if (calcPackage) calcPackage.value = '2950';
+                if (calcOffer) calcOffer.value = 'honeymoon25';
+            } else if (bundleName.includes('Family')) {
+                if (calcPackage) calcPackage.value = '2950';
+                if (calcOffer) calcOffer.value = 'group10';
+            } else if (bundleName.includes('Surf')) {
+                if (calcPackage) calcPackage.value = '4200';
+                if (calcOffer) calcOffer.value = 'none';
+            }
+            if (typeof calculateSafariRates === 'function') calculateSafariRates();
+        });
+    });
 });
