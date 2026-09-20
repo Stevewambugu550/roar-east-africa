@@ -71,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const calcPackage = document.getElementById('calcPackage');
     const calcGuests  = document.getElementById('calcGuests');
+    const calcGuestsOther = document.getElementById('calcGuestsOther');
+    const travelerChips = document.getElementById('travelerChips');
     const calcSeason  = document.getElementById('calcSeason');
     const calcAddon   = document.getElementById('calcAddon');
     const calcOffer   = document.getElementById('calcOffer');
@@ -80,6 +82,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const perPersonDisplay = document.getElementById('perPersonPrice');
     const totalGroupDisplay = document.getElementById('totalGroupPrice');
     let currentEstimate = null;
+
+    function getTotalGuests() {
+        const other = calcGuestsOther ? Number(calcGuestsOther.value) : 0;
+        if (other > 0) return Math.min(other, 100);
+        return calcGuests ? Number(calcGuests.value) || 2 : 2;
+    }
+
+    function selectTravelerChip(value) {
+        if (!travelerChips) return;
+        travelerChips.querySelectorAll('button[data-value]').forEach(btn => btn.classList.toggle('active', btn.dataset.value === String(value)));
+        if (calcGuests) calcGuests.value = value;
+        if (calcGuestsOther) calcGuestsOther.value = '';
+    }
+
+    if (travelerChips) {
+        travelerChips.querySelectorAll('button[data-value]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectTravelerChip(btn.dataset.value);
+                calculateSafariRates();
+            });
+        });
+        calcGuestsOther?.addEventListener('input', () => {
+            travelerChips.querySelectorAll('button[data-value]').forEach(btn => btn.classList.remove('active'));
+            calculateSafariRates();
+        });
+    }
 
     const customNightlyRates = {
         ultra:   { mara: 750, amboseli: 680, samburu: 640, tsavo: 590, diani: 520 },
@@ -106,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateSafariRates() {
         if (!calcPackage || !calcGuests || !calcSeason || !calcAddon) return;
-        const totalGuests = Number(calcGuests.value);
+        const totalGuests = getTotalGuests();
         const seasonalMultiplier = Number(calcSeason.value);
         const experienceAddon = Number(calcAddon.value);
         const singleSupplement = totalGuests === 1 ? 650 : 0;
