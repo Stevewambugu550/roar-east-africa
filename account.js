@@ -35,8 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }) });
             const data = await response.json(); if (!response.ok) throw new Error(data.message);
             registerForm.reset();
+            if (data.token && data.user) {
+                window.roarAccount.save(data.token, data.user);
+                const destination = params.get('return');
+                window.location.href = destination && destination.startsWith(location.origin) ? destination : 'index.html';
+                return;
+            }
             if (data.verificationUrl) {
-                showMessage('Account created. For local testing, open the verification link below.', 'success');
+                showMessage('Account created. Open the verification link below.', 'success');
                 const link = document.createElement('a'); link.href = data.verificationUrl; link.textContent = 'Verify my email'; link.style.display='block'; link.style.marginTop='8px'; message.appendChild(link);
             } else showMessage(data.message, 'success');
         } catch (error) { showMessage(error.message, 'error'); }
