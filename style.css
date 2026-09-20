@@ -40,3 +40,14 @@
 .circuit-chip.selected i{color:#d4af37}
 
 @media(max-width:768px){#radar-panel{grid-template-columns:1fr;gap:30px}}
+
+/* Premium radar micro-animations */
+@keyframes savannaFadeInUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+@keyframes metricPop{0%{transform:scale(.95);opacity:0}100%{transform:scale(1);opacity:1}}
+.animate-fade-up{animation:savannaFadeInUp .5s cubic-bezier(.25,1,.5,1) forwards}
+.animate-metric{animation:metricPop .4s cubic-bezier(.175,.885,.32,1.275) forwards}
+#radar-species li{opacity:0;animation:savannaFadeInUp .4s ease forwards}
+#radar-species li:nth-child(1){animation-delay:.1s}
+#radar-species li:nth-child(2){animation-delay:.2s}
+#radar-species li:nth-child(3){animation-delay:.3s}
+@media(prefers-reduced-motion:reduce){.animate-fade-up,.animate-metric,#radar-species li{animation:none;opacity:1}}

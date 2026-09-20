@@ -400,12 +400,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = radarData[regionKey];
         if (!data) return;
         document.querySelectorAll('.radar-btn').forEach((btn) => btn.classList.toggle('active-radar', btn.dataset.radar === regionKey));
+
+        const panel = document.getElementById('radar-panel');
+        const statCats = document.getElementById('stat-cats');
+        const statHerds = document.getElementById('stat-herds');
+        const speciesBox = document.getElementById('radar-species');
+
+        panel.classList.remove('animate-fade-up');
+        statCats.classList.remove('animate-metric');
+        statHerds.classList.remove('animate-metric');
+        void panel.offsetWidth; // force reflow to reset animations
+
         document.getElementById('radar-title').textContent = data.title;
         document.getElementById('radar-desc').textContent = data.desc;
-        document.getElementById('stat-cats').textContent = data.cats;
-        document.getElementById('stat-herds').textContent = data.herds;
-        const speciesBox = document.getElementById('radar-species');
+        statCats.textContent = data.cats;
+        statHerds.textContent = data.herds;
         speciesBox.innerHTML = data.species.map((sp) => `<li><i class="fa-solid fa-paw" style="color:#d4af37;margin-right:10px"></i> ${sp}</li>`).join('');
+
+        panel.classList.add('animate-fade-up');
+        statCats.classList.add('animate-metric');
+        statHerds.classList.add('animate-metric');
     }
 
     document.querySelectorAll('.radar-btn').forEach((btn) => {
