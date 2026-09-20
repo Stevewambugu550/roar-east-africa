@@ -41,13 +41,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault(); showMessage('Creating your account…');
         try {
-            await window.roarAccount.signUp({
+            const data = await window.roarAccount.signUp({
                 email: document.getElementById('regEmail').value.trim(),
                 password: document.getElementById('regPassword').value,
                 firstName: document.getElementById('regFirst').value.trim(),
                 lastName: document.getElementById('regLast').value.trim(),
             });
             registerForm.reset();
+            // If Supabase has email confirmation disabled, signUp returns a session immediately.
+            if (data?.session) {
+                await window.roarAccount.setSession(data.session);
+                const destination = params.get('return');
+                window.location.href = destination && destination.startsWith(location.origin) ? destination : 'index.html';
+                return;
+            }
             showMessage('Account created. Check your email for the confirmation link before signing in.', 'success');
         } catch (error) { showMessage(error.message, 'error'); }
     });
