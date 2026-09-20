@@ -1,6 +1,6 @@
 window.ROAR_CONFIG = Object.freeze({
     apiBase: '/api/roar',
-    supabaseUrl: 'https://qyeevpoqvpovnqqikqzkjc.supabase.co',
+    supabaseUrl: 'https://gyecvqpovpngjaikqzkz.supabase.co',
     supabaseKey: 'sb_publishable_bbd0T0-QGgL7FjM8z67-7Q_ezSBkKcR',
 });
 
