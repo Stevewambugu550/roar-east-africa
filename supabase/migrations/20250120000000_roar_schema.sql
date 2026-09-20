@@ -111,6 +111,7 @@ DROP POLICY IF EXISTS roar_customers_admin ON public.roar_customers;
 DROP POLICY IF EXISTS roar_leads_insert_own ON public.roar_leads;
 DROP POLICY IF EXISTS roar_leads_select_own ON public.roar_leads;
 DROP POLICY IF EXISTS roar_leads_admin_all ON public.roar_leads;
+DROP POLICY IF EXISTS roar_leads_admin_update ON public.roar_leads;
 DROP POLICY IF EXISTS roar_quiz_public_insert ON public.roar_quiz_results;
 DROP POLICY IF EXISTS roar_quiz_admin_select ON public.roar_quiz_results;
 DROP POLICY IF EXISTS roar_claims_admin_select ON public.roar_launch_claims;
