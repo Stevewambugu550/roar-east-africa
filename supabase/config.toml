@@ -1,0 +1,4 @@
+project_id = "qyeevpoqvpovnqqikqzkjc"
+
+[functions.roar-api]
+verify_jwt = false
