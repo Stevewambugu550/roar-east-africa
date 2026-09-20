@@ -225,9 +225,11 @@
     font-size: 11px;
 }
 
-select option {
-    background: #fff;
-    color: #151d16;
+.input-wrap select option,
+.calculator-box select option,
+.planner-form-box select option {
+    background: #fff !important;
+    color: #151d16 !important;
 }
 
 .leadership-section {
