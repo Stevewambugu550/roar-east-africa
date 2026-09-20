@@ -198,6 +198,12 @@
     border-bottom: 1px solid #f0ecdf;
 }
 
+.pkg-img-wrapper.laikipia { background-image: url('images/maasai-mara.webp'); }
+
+@media (min-width: 768px) {
+    .itinerary-grid { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+}
+
 .custom-nights-field { grid-column: span 2; }
 .custom-nights-grid {
     display: grid;
