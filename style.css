@@ -198,10 +198,41 @@
     border-bottom: 1px solid #f0ecdf;
 }
 
+.custom-nights-field { grid-column: span 2; }
+.custom-nights-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 8px;
+}
+.custom-nights-grid div label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--clay);
+    margin-bottom: 6px;
+    display: block;
+}
+.custom-nights-grid input {
+    text-align: center;
+    padding: 12px 4px;
+}
+
 @media (max-width: 768px) {
     .calc-row,
     .form-row {
         grid-template-columns: 1fr;
+    }
+    .custom-nights-field,
+    .calculator-box label,
+    .planner-form-box label,
+    textarea,
+    button[type="submit"] {
+        grid-column: span 1;
+    }
+    .custom-nights-grid {
+        grid-template-columns: repeat(3, 1fr);
     }
     .builder-section,
     .calculator-section,

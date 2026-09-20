@@ -74,18 +74,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcSeason  = document.getElementById('calcSeason');
     const calcAddon   = document.getElementById('calcAddon');
     const calcOffer   = document.getElementById('calcOffer');
+    const calcCustomTier = document.getElementById('calcCustomTier');
+    const customOptions = document.getElementById('customOptions');
+    const customTierRow = document.getElementById('customTierRow');
     const perPersonDisplay = document.getElementById('perPersonPrice');
     const totalGroupDisplay = document.getElementById('totalGroupPrice');
     let currentEstimate = null;
 
+    const customNightlyRates = {
+        ultra:   { mara: 750, amboseli: 680, samburu: 640, tsavo: 590, diani: 520 },
+        premium: { mara: 520, amboseli: 470, samburu: 450, tsavo: 410, diani: 360 },
+        classic: { mara: 340, amboseli: 310, samburu: 300, tsavo: 270, diani: 240 },
+    };
+    const customRegionNames = { mara: 'Maasai Mara', amboseli: 'Amboseli', samburu: 'Samburu', tsavo: 'Tsavo West', diani: 'Diani Beach' };
+
+    function readCustomNights() {
+        return {
+            mara: Number(document.getElementById('nightsMara')?.value) || 0,
+            amboseli: Number(document.getElementById('nightsAmboseli')?.value) || 0,
+            samburu: Number(document.getElementById('nightsSamburu')?.value) || 0,
+            tsavo: Number(document.getElementById('nightsTsavo')?.value) || 0,
+            diani: Number(document.getElementById('nightsDiani')?.value) || 0,
+        };
+    }
+
+    function toggleCustomFields() {
+        const isCustom = calcPackage.value === 'custom';
+        if (customOptions) customOptions.hidden = !isCustom;
+        if (customTierRow) customTierRow.hidden = !isCustom;
+    }
+
     function calculateSafariRates() {
         if (!calcPackage || !calcGuests || !calcSeason || !calcAddon) return;
-        const basePrice = Number(calcPackage.value);
         const totalGuests = Number(calcGuests.value);
         const seasonalMultiplier = Number(calcSeason.value);
         const experienceAddon = Number(calcAddon.value);
         const singleSupplement = totalGuests === 1 ? 650 : 0;
         const offerPercent = calcOffer ? Number(calcOffer.selectedOptions[0]?.dataset.discount || 0) : 0;
+
+        let basePrice, packageName, customRoute = [];
+        if (calcPackage.value === 'custom') {
+            const tier = calcCustomTier ? calcCustomTier.value : 'premium';
+            const rates = customNightlyRates[tier] || customNightlyRates.premium;
+            const nights = readCustomNights();
+            let customBase = 0;
+            Object.keys(nights).forEach((region) => {
+                if (nights[region] > 0) {
+                    customBase += nights[region] * rates[region];
+                    customRoute.push(`${customRegionNames[region]} (${nights[region]} nights)`);
+                }
+            });
+            basePrice = customBase;
+            packageName = `Custom Safari — ${customRoute.join(', ') || 'no destinations selected'}`;
+        } else {
+            basePrice = Number(calcPackage.value);
+            packageName = calcPackage.selectedOptions[0]?.dataset.name || 'Selected safari';
+        }
+
         const rawPerPerson = Math.round(basePrice * seasonalMultiplier + experienceAddon + singleSupplement);
         const rawGroupTotal = rawPerPerson * totalGuests;
         const discountAmount = Math.round(rawGroupTotal * (offerPercent / 100));
@@ -95,20 +140,24 @@ document.addEventListener('DOMContentLoaded', () => {
         perPersonDisplay.textContent = currency.format(perPerson);
         totalGroupDisplay.textContent = currency.format(groupTotal);
         currentEstimate = {
-            packageName: calcPackage.selectedOptions[0].dataset.name,
+            packageName,
             guests: totalGuests,
-            season: calcSeason.selectedOptions[0].dataset.name,
-            addon: calcAddon.selectedOptions[0].dataset.name,
-            offer: calcOffer ? calcOffer.selectedOptions[0].dataset.name : 'Standard estimate',
+            season: calcSeason.selectedOptions[0]?.dataset.name || '',
+            addon: calcAddon.selectedOptions[0]?.dataset.name || '',
+            offer: calcOffer ? calcOffer.selectedOptions[0]?.dataset.name : 'Standard estimate',
             perPerson,
             groupTotal,
             discountAmount,
         };
     }
 
-    [calcPackage, calcGuests, calcSeason, calcAddon, calcOffer].filter(Boolean).forEach(field => {
-        field.addEventListener('change', calculateSafariRates);
+    [calcPackage, calcGuests, calcSeason, calcAddon, calcOffer, calcCustomTier].filter(Boolean).forEach(field => {
+        field.addEventListener('change', () => { toggleCustomFields(); calculateSafariRates(); });
     });
+    document.querySelectorAll('#customOptions input[type="number"]').forEach(input => {
+        input.addEventListener('input', calculateSafariRates);
+    });
+    toggleCustomFields();
     calculateSafariRates();
 
     document.getElementById('useEstimateBtn')?.addEventListener('click', () => {

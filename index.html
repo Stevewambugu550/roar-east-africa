@@ -154,8 +154,23 @@
         <div class="calc-header"><h3><i class="fa-solid fa-calculator"></i> Live Package Price Estimator</h3><p>Adjust your preferences for a planning estimate in US dollars.</p></div>
         <div class="calc-body">
           <div class="calc-row">
-            <div class="calc-field"><label for="calcPackage">Choose itinerary</label><select id="calcPackage"><option value="2950" data-name="The Sky Safari & Mara Migration" selected>7-Day Sky Safari &amp; Mara Migration — $2,950 base</option><option value="4200" data-name="Grand Savanna & Diani Waters">10-Day Grand Savanna &amp; Diani Waters — $4,200 base</option></select></div>
+            <div class="calc-field"><label for="calcPackage">Choose itinerary</label><select id="calcPackage"><option value="2950" data-name="The Sky Safari & Mara Migration" selected>7-Day Sky Safari &amp; Mara Migration — $2,950 base</option><option value="4200" data-name="Grand Savanna & Diani Waters">10-Day Grand Savanna &amp; Diani Waters — $4,200 base</option><option value="custom" data-name="Custom Multi-Destination Safari">Custom multi-destination safari</option></select></div>
             <div class="calc-field"><label for="calcGuests">Total travelers</label><select id="calcGuests"><option value="1">1 person — single supplement applies</option><option value="2" selected>2 people — couple</option><option value="4">4 people — family / small group</option><option value="6">6 people — private group</option></select></div>
+          </div>
+          <div class="calc-row" id="customOptions" hidden>
+            <div class="calc-field custom-nights-field">
+              <label>Build your custom route (nights per destination)</label>
+              <div class="custom-nights-grid">
+                <div><label for="nightsMara">Maasai Mara</label><input id="nightsMara" type="number" min="0" max="14" value="0"></div>
+                <div><label for="nightsAmboseli">Amboseli</label><input id="nightsAmboseli" type="number" min="0" max="14" value="0"></div>
+                <div><label for="nightsSamburu">Samburu</label><input id="nightsSamburu" type="number" min="0" max="14" value="0"></div>
+                <div><label for="nightsTsavo">Tsavo West</label><input id="nightsTsavo" type="number" min="0" max="14" value="0"></div>
+                <div><label for="nightsDiani">Diani Beach</label><input id="nightsDiani" type="number" min="0" max="14" value="0"></div>
+              </div>
+            </div>
+          </div>
+          <div class="calc-row" id="customTierRow" hidden>
+            <div class="calc-field"><label for="calcCustomTier">Custom lodging tier</label><select id="calcCustomTier"><option value="ultra">Ultra-Luxury Private Camps</option><option value="premium" selected>Premium Boutique Tented Lodges</option><option value="classic">Classic Comfortable Camps</option></select></div>
           </div>
           <div class="calc-row">
             <div class="calc-field"><label for="calcSeason">Travel season</label><select id="calcSeason"><option value="1.3" data-name="Peak Migration (July–October)">Peak Migration: July–October (+30%)</option><option value="1" data-name="Regular Peak (January–March)" selected>Regular Peak: January–March</option><option value="0.85" data-name="Green Season (April–June)">Green Season: April–June (−15%)</option></select></div>
