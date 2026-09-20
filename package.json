@@ -1,0 +1,19 @@
+{
+  "name": "roar-east-africa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "serverless-http": "^3.2.0"
+  },
+  "scripts": {
+    "dev": "node local-server.js"
+  }
+}
