@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive Kenya safari packing checklist covering clothing, camera equipment, luggage, health, documents, and flight essentials.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://roareastafrica.com/packing.html">
+  <title>The Art of Safari Packing | Roar East Africa</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="packing.css">
+</head>
+<body>
+  <nav class="navbar packing-nav"><a href="index.html" class="logo">ROAR <span>EAST AFRICA</span></a><a href="index.html" class="btn-nav"><i class="fa-solid fa-arrow-left-long"></i> Return Home</a></nav>
+
+  <header class="packing-hero">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-content packing-heading"><span class="hero-tag">Expert Field Guide</span><h1>The Art of<br><em>Safari Packing</em></h1><p>A refined checklist for light-aircraft transfers, cool dawn game drives, warm afternoons, and effortless evenings in camp.</p></div>
+  </header>
+
+  <main class="packing-container">
+    <section class="packing-progress" aria-live="polite"><div><span>Your checklist</span><strong id="packingCount">0 of 18 packed</strong></div><div class="progress-track"><div id="packingProgress"></div></div><button id="resetPacking" type="button">Reset checklist</button></section>
+
+    <div class="packing-grid">
+      <section class="packing-card"><i class="fa-solid fa-shirt card-icon"></i><h2>Savanna-Ready Apparel</h2><p class="card-intro">Breathable layers in practical, muted colors.</p><ul class="packing-list">
+        <li><label><input type="checkbox" data-item="light-layers"><span>Lightweight shirts and trousers in khaki, olive, or tan</span></label></li>
+        <li><label><input type="checkbox" data-item="fleece"><span>Warm fleece or insulated layer for dawn drives</span></label></li>
+        <li><label><input type="checkbox" data-item="jacket"><span>Light windproof or waterproof jacket</span></label></li>
+        <li><label><input type="checkbox" data-item="hat"><span>Wide-brimmed hat with a secure strap</span></label></li>
+        <li><label><input type="checkbox" data-item="shoes"><span>Comfortable, broken-in walking shoes</span></label></li>
+      </ul><div class="pro-tip"><strong>Field note:</strong> Neutral colors are practical. Avoid camouflage clothing where it is restricted, and check the rules for every country on your itinerary.</div></section>
+
+      <section class="packing-card"><i class="fa-solid fa-camera-retro card-icon"></i><h2>Optics &amp; Camera Gear</h2><p class="card-intro">Prepare for distance, dust, and limited charging time.</p><ul class="packing-list">
+        <li><label><input type="checkbox" data-item="binoculars"><span>8×42 or 10×42 binoculars</span></label></li>
+        <li><label><input type="checkbox" data-item="camera"><span>Camera with a suitable telephoto lens</span></label></li>
+        <li><label><input type="checkbox" data-item="memory"><span>Spare memory cards and batteries</span></label></li>
+        <li><label><input type="checkbox" data-item="cleaning"><span>Lens cloth, blower, and dust protection</span></label></li>
+        <li><label><input type="checkbox" data-item="power"><span>Airline-compliant power bank and adapters</span></label></li>
+      </ul><div class="pro-tip"><strong>Field note:</strong> Keep one camera ready, but put equipment away between sightings to limit dust exposure.</div></section>
+
+      <section class="packing-card"><i class="fa-solid fa-suitcase-rolling card-icon"></i><h2>Luggage &amp; Bush Essentials</h2><p class="card-intro">Pack soft, light, and easy to move.</p><ul class="packing-list">
+        <li><label><input type="checkbox" data-item="duffel"><span>Soft-sided duffel without a rigid frame</span></label></li>
+        <li><label><input type="checkbox" data-item="daypack"><span>Small daypack for documents and camera gear</span></label></li>
+        <li><label><input type="checkbox" data-item="sun"><span>High-SPF sunscreen, sunglasses, and lip balm</span></label></li>
+        <li><label><input type="checkbox" data-item="repellent"><span>Effective insect repellent appropriate for you</span></label></li>
+        <li><label><input type="checkbox" data-item="bottle"><span>Reusable water bottle</span></label></li>
+      </ul><div class="pro-tip"><strong>Flight note:</strong> Bush-flight allowances vary by operator and route and are often around 15 kg in soft bags. Follow the confirmed allowance on your ticket.</div></section>
+
+      <section class="packing-card"><i class="fa-solid fa-passport card-icon"></i><h2>Documents &amp; Health</h2><p class="card-intro">Keep essentials accessible and backed up.</p><ul class="packing-list">
+        <li><label><input type="checkbox" data-item="passport"><span>Passport, visas, and entry documentation</span></label></li>
+        <li><label><input type="checkbox" data-item="insurance"><span>Travel and medical evacuation insurance details</span></label></li>
+        <li><label><input type="checkbox" data-item="medication"><span>Prescription medicine in original packaging</span></label></li>
+      </ul><div class="pro-tip"><strong>Health note:</strong> Consult a qualified travel-health professional about vaccinations, malaria prevention, and personal medication well before departure.</div></section>
+    </div>
+
+    <section class="packing-final"><span class="sub">Before You Zip the Bag</span><h2>Check your final flight documents.</h2><p>Your confirmed itinerary and airline ticket—not a general website—are the authority for baggage dimensions, weight limits, restricted items, and battery handling.</p><a href="https://wa.me/254728232447?text=Hello%20Roar%20East%20Africa%2C%20I%20have%20a%20question%20about%20packing%20for%20my%20safari." class="guide-cta" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> Ask a Packing Question</a></section>
+  </main>
+
+  <footer class="site-footer"><div class="footer-wrap"><div class="footer-brand"><h3>ROAR <span>EAST AFRICA</span></h3><p>Luxury wilderness journeys, designed in Kenya.</p></div><div class="footer-contact"><a href="terms.html">Booking Terms</a><a href="mailto:hello@roareastafrica.com">hello@roareastafrica.com</a></div><div class="footer-meta"><p>© 2026 Roar East Africa.</p></div></div></footer>
+  <script src="packing.js"></script>
+  <script src="analytics.js"></script>
+</body>
+</html>

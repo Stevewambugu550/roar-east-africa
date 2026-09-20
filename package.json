@@ -1,0 +1,9 @@
+{
+  "name": "roar-east-africa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node local-server.js",
+    "check": "node --check app.js && node --check account.js && node --check admin.js && node --check local-server.js"
+  }
+}

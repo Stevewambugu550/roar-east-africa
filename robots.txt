@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /account.html
+Disallow: /invoice-email.html
+Disallow: /newsletter.html
+Disallow: /newsletter-day-30.html
+Disallow: /newsletter-day-60.html
+
+Sitemap: https://roareastafrica.com/sitemap.xml

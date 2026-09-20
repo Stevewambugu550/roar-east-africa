@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Expedition Control Desk | Roar East Africa</title><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"><link rel="stylesheet" href="admin.css"></head>
+<body>
+  <main class="admin-shell">
+    <section id="loginPanel" class="login-panel"><div class="admin-brand">ROAR <span>CONTROL DESK</span></div><h1>Administrator Sign In</h1><p>Use your authorized Roar East Africa administrator account.</p><form id="adminLogin"><label>Email<input id="adminEmail" type="email" required autocomplete="username"></label><label>Password<input id="adminPassword" type="password" required autocomplete="current-password"></label><button type="submit">Secure Sign In</button><div id="loginError" class="error" role="alert"></div></form><a href="index.html" class="back-link">← Return to website</a></section>
+
+    <section id="dashboardPanel" class="dashboard" hidden>
+      <header class="dash-header"><div><span class="eyebrow">Roar East Africa</span><h1>Expedition Control Desk</h1></div><div class="header-actions"><span id="adminIdentity"></span><button id="refreshLeads" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button><button id="adminLogout" type="button">Sign Out</button></div></header>
+      <div class="metrics-row"><article><small>Total briefs</small><strong id="metricLeads">0</strong></article><article><small>Travelers</small><strong id="metricGuests">0</strong></article><article><small>Estimated pipeline</small><strong id="metricRevenue">$0</strong></article><article><small>New leads</small><strong id="metricNew">0</strong></article></div>
+      <div class="toolbar"><label>Filter status<select id="statusFilter"><option value="all">All leads</option><option value="new">New</option><option value="reviewing">Reviewing</option><option value="contacted">Contacted</option><option value="proposal_sent">Proposal sent</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Search<input id="leadSearch" type="search" placeholder="Name, email, objective…"></label></div>
+      <div id="dashboardError" class="error" role="alert"></div>
+      <div class="lead-table-box"><table><thead><tr><th>Received</th><th>Client</th><th>Journey</th><th>Guests</th><th>Tier</th><th>Estimate</th><th>Status</th></tr></thead><tbody id="leadRows"><tr><td colspan="7" class="empty">Loading briefs…</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <script src="site-config.js"></script><script src="admin.js"></script>
+</body></html>
