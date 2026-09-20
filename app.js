@@ -186,6 +186,30 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('roar_migration_window');
     }
 
+    const luxuryTierSelect = document.getElementById('luxuryTier');
+    const luxuryTierOtherWrap = document.getElementById('luxuryTierOtherWrap');
+    const luxuryTierOther = document.getElementById('luxuryTierOther');
+    const safariGoalSelect = document.getElementById('safariGoal');
+    const safariGoalOtherWrap = document.getElementById('safariGoalOtherWrap');
+    const safariGoalOther = document.getElementById('safariGoalOther');
+
+    function toggleOtherField(select, wrap) {
+        if (!select || !wrap) return;
+        const isOther = select.value.includes('Other');
+        wrap.hidden = !isOther;
+        if (!isOther && wrap.querySelector('input')) wrap.querySelector('input').value = '';
+    }
+
+    [luxuryTierSelect, safariGoalSelect].forEach(select => {
+        if (!select) return;
+        select.addEventListener('change', () => {
+            toggleOtherField(luxuryTierSelect, luxuryTierOtherWrap);
+            toggleOtherField(safariGoalSelect, safariGoalOtherWrap);
+        });
+    });
+    toggleOtherField(luxuryTierSelect, luxuryTierOtherWrap);
+    toggleOtherField(safariGoalSelect, safariGoalOtherWrap);
+
     const leadForm = document.getElementById('safariLeadForm');
     leadForm?.addEventListener('submit', async event => {
         event.preventDefault();
@@ -200,8 +224,12 @@ document.addEventListener('DOMContentLoaded', () => {
             clientEmail: email,
             targetDates: document.getElementById('travelDates').value.trim(),
             totalGuests: Number(document.getElementById('guestCount').value),
-            tierPreference: document.getElementById('luxuryTier').value,
-            primaryObjective: document.getElementById('safariGoal').value,
+            tierPreference: document.getElementById('luxuryTier').value.includes('Other') && luxuryTierOther?.value.trim()
+                ? `${document.getElementById('luxuryTier').value}: ${luxuryTierOther.value.trim()}`
+                : document.getElementById('luxuryTier').value,
+            primaryObjective: document.getElementById('safariGoal').value.includes('Other') && safariGoalOther?.value.trim()
+                ? `${document.getElementById('safariGoal').value}: ${safariGoalOther.value.trim()}`
+                : document.getElementById('safariGoal').value,
             notes: document.getElementById('clientNotes').value.trim(),
             termsAccepted: document.getElementById('termsConsent').checked,
             marketingConsent: document.getElementById('marketingConsent').checked,
