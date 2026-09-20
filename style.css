@@ -225,6 +225,11 @@
     font-size: 11px;
 }
 
+select option {
+    background: #fff;
+    color: #151d16;
+}
+
 .leadership-section {
     background: #fdfbf7;
     border-top: 1px solid #f0ecdf;
