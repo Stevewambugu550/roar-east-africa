@@ -1,70 +1,33 @@
 class RoarAccount {
     constructor() {
-        this.supabase = window.ROAR_SUPABASE;
-        this.user = null;
-        this.profile = null;
-        this.session = null;
+        this.token = localStorage.getItem('roar_customer_token');
+        try { this.user = JSON.parse(localStorage.getItem('roar_customer_user')); } catch { this.user = null; }
+        try {
+            const encoded = (this.token || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=')));
+            if (!payload.exp || payload.exp * 1000 <= Date.now() || payload.app !== 'roar') this.clear();
+        } catch { this.clear(); }
     }
-
-    async init() {
-        if (!this.supabase) return;
-        const { data: { session } } = await this.supabase.auth.getSession();
-        if (session) await this.setSession(session);
-        this.supabase.auth.onAuthStateChange(async (_event, session) => {
-            if (session) await this.setSession(session);
-            else { this.user = null; this.profile = null; this.session = null; }
-        });
+    clear() {
+        this.token = null; this.user = null;
+        localStorage.removeItem('roar_customer_token');
+        localStorage.removeItem('roar_customer_user');
     }
-
-    async setSession(session) {
-        this.session = session;
-        this.user = session.user;
-        await this.loadProfile(session.user);
+    headers() { return { 'Content-Type':'application/json', Authorization:`Bearer ${this.token}` }; }
+    isAuthenticated() { return !!this.token && !!this.user; }
+    save(token, user) {
+        this.token = token; this.user = user;
+        localStorage.setItem('roar_customer_token', token);
+        localStorage.setItem('roar_customer_user', JSON.stringify(user));
     }
-
-    async loadProfile(authUser) {
-        const { data, error } = await this.supabase.from('roar_customers').select('*').eq('id', authUser.id).single();
-        if (error) { console.error('Profile load error:', error.message); this.profile = null; return; }
-        this.profile = data;
-    }
-
-    isAuthenticated() { return !!this.user && !!this.profile; }
-
-    async signUp({ email, password, firstName, lastName }) {
-        if (!this.supabase) throw new Error('Supabase client not available.');
-        const { data, error } = await this.supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { first_name: firstName, last_name: lastName },
-                emailRedirectTo: `${window.location.origin}/account.html`,
-            },
-        });
-        if (error) throw error;
-        return data;
-    }
-
-    async signIn(email, password) {
-        if (!this.supabase) throw new Error('Supabase client not available.');
-        const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        await this.setSession(data.session);
-        return data;
-    }
-
-    async signOut() {
-        if (!this.supabase) return;
-        await this.supabase.auth.signOut();
-        this.user = null; this.profile = null; this.session = null;
+    logout() {
+        this.clear();
         window.location.href = 'index.html';
     }
-
     requireAccount(returnTo = window.location.href) {
         if (this.isAuthenticated()) return true;
         window.location.href = `account.html?return=${encodeURIComponent(returnTo)}`;
         return false;
     }
 }
-
 window.roarAccount = new RoarAccount();
-window.roarAccount.init();

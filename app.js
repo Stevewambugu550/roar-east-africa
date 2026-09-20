@@ -1,26 +1,21 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const menuButton = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     const account = window.roarAccount;
-    await account.init();
-    const supabase = window.ROAR_SUPABASE;
     const accountAction = document.getElementById('accountAction');
-    if (account?.isAuthenticated() && account.profile) {
-        accountAction.innerHTML = `<span>Hi, ${account.profile.first_name}</span><button type="button">Sign Out</button>`;
+    if (account?.isAuthenticated()) {
+        accountAction.innerHTML = `<span>Hi, ${account.user.firstName}</span><button type="button">Sign Out</button>`;
         accountAction.querySelector('button').addEventListener('click', () => account.logout());
         const name = document.getElementById('clientName');
         const email = document.getElementById('clientEmail');
-        if (name) name.value = `${account.profile.first_name} ${account.profile.last_name}`;
+        if (name) name.value = `${account.user.firstName} ${account.user.lastName}`;
         if (email) email.value = account.user.email;
     }
-    try {
-        const { data: promo, error } = await supabase.rpc('roar_promotion_status');
-        if (!error && promo) {
-            const banner = document.getElementById('launchBanner');
-            if (promo.remaining > 0) banner.querySelector('span').textContent = `10% off eligible safari services — ${promo.remaining} of 5 founding-client places remain.`;
-            else banner.hidden = true;
-        }
-    } catch (e) { /* ignore */ }
+    fetch(`${window.ROAR_CONFIG.apiBase}/promotion`).then(response => response.json()).then(promo => {
+        const banner = document.getElementById('launchBanner');
+        if (promo.remaining > 0) banner.querySelector('span').textContent = `10% off eligible safari services — ${promo.remaining} of 5 founding-client places remain.`;
+        else banner.hidden = true;
+    }).catch(() => {});
 
     menuButton?.addEventListener('click', () => {
         const open = navLinks.classList.toggle('open');
@@ -165,21 +160,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         submitButton.disabled = true;
         submitButton.textContent = 'Sending your brief…';
         try {
-            const { error } = await supabase.from('roar_leads').insert([{
-                customer_id: account.user.id,
-                client_name: brief.clientName,
-                client_email: brief.clientEmail,
-                target_dates: brief.targetDates,
-                total_guests: brief.totalGuests,
-                tier_preference: brief.tierPreference,
-                primary_objective: brief.primaryObjective,
-                notes: brief.notes,
-                terms_accepted: brief.termsAccepted,
-                marketing_consent: brief.marketingConsent,
-                estimated_value: brief.estimatedValue,
-                source: 'website',
-            }]);
-            if (error) throw error;
+            const response = await fetch(`${window.ROAR_CONFIG.apiBase}/leads`, {
+                method: 'POST',
+                headers: account.headers(),
+                body: JSON.stringify(brief),
+            });
+            const data = await response.json();
+            if (response.status === 401) {
+                account.logout();
+                return;
+            }
+            if (!response.ok) throw new Error(data.message || 'Unable to submit your inquiry.');
         } catch (error) {
             let errorBox = document.getElementById('leadSubmitError');
             if (!errorBox) {
@@ -268,15 +259,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function recordQuizResult(title, transit, lodging, finale, travelers, season, offer) {
         try {
-            await supabase.from('roar_quiz_results').insert([{
-                traveler_persona: title,
-                selected_transit: transit,
-                selected_lodging: lodging,
-                selected_finale: finale,
-                selected_travelers: travelers,
-                selected_season: season,
-                matched_offer: offer,
-            }]);
+            await fetch(`${window.ROAR_CONFIG.apiBase}/quiz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    traveler_persona: title,
+                    selected_transit: transit,
+                    selected_lodging: lodging,
+                    selected_finale: finale,
+                    selected_travelers: travelers,
+                    selected_season: season,
+                    matched_offer: offer,
+                }),
+            });
         } catch (err) {
             console.error('Quiz tracking failed:', err);
         }
@@ -405,26 +400,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = radarData[regionKey];
         if (!data) return;
         document.querySelectorAll('.radar-btn').forEach((btn) => btn.classList.toggle('active-radar', btn.dataset.radar === regionKey));
-
-        const panel = document.getElementById('radar-panel');
-        const statCats = document.getElementById('stat-cats');
-        const statHerds = document.getElementById('stat-herds');
-        const speciesBox = document.getElementById('radar-species');
-
-        panel.classList.remove('animate-fade-up');
-        statCats.classList.remove('animate-metric');
-        statHerds.classList.remove('animate-metric');
-        void panel.offsetWidth; // force reflow to reset animations
-
         document.getElementById('radar-title').textContent = data.title;
         document.getElementById('radar-desc').textContent = data.desc;
-        statCats.textContent = data.cats;
-        statHerds.textContent = data.herds;
+        document.getElementById('stat-cats').textContent = data.cats;
+        document.getElementById('stat-herds').textContent = data.herds;
+        const speciesBox = document.getElementById('radar-species');
         speciesBox.innerHTML = data.species.map((sp) => `<li><i class="fa-solid fa-paw" style="color:#d4af37;margin-right:10px"></i> ${sp}</li>`).join('');
-
-        panel.classList.add('animate-fade-up');
-        statCats.classList.add('animate-metric');
-        statHerds.classList.add('animate-metric');
     }
 
     document.querySelectorAll('.radar-btn').forEach((btn) => {
