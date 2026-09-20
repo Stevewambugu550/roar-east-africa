@@ -213,11 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     let currentQ = 0;
     const scores = { fly: 0, road: 0, lodge: 0, camp: 0, beach: 0, bush: 0 };
+    let selectedAnswers = [];
 
     document.getElementById('startQuizBtn')?.addEventListener('click', () => {
         document.getElementById('quiz-intro').style.display = 'none';
         document.getElementById('quiz-window').style.display = 'block';
         currentQ = 0;
+        selectedAnswers = [];
         for (const k of Object.keys(scores)) scores[k] = 0;
         renderQuestion();
     });
@@ -234,12 +236,30 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('mouseleave', () => { btn.style.background = '#fdfbf7'; btn.style.borderColor = '#dcd7ca'; });
             btn.addEventListener('click', () => {
                 scores[opt.v]++;
+                selectedAnswers.push(opt.t);
                 currentQ++;
                 if (currentQ < quizData.length) renderQuestion();
                 else showQuizResult();
             });
             optionsBox.appendChild(btn);
         });
+    }
+
+    async function recordQuizResult(title, transit, lodging, finale) {
+        try {
+            await fetch(`${window.ROAR_CONFIG.apiBase}/quiz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    traveler_persona: title,
+                    selected_transit: transit,
+                    selected_lodging: lodging,
+                    selected_finale: finale,
+                }),
+            });
+        } catch (err) {
+            console.error('Quiz tracking failed:', err);
+        }
     }
 
     function showQuizResult() {
@@ -269,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cta = 'Start Planning Your Classic Safari';
             target = '#planner';
         }
+        recordQuizResult(title, selectedAnswers[0], selectedAnswers[1], selectedAnswers[2]);
         windowBox.innerHTML = `<div style="text-align:center;padding:10px 0">
             <h3 style="font-family:Cormorant Garamond,serif;font-size:28px;color:#151d16;margin-bottom:12px">You profile as a: ${title}</h3>
             <p style="color:#6b6861;font-size:15px;line-height:1.6;margin:0 0 25px">${text}</p>

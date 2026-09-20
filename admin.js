@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.setItem('roar_admin_email', data.user.email || email);
     }
 
-    async function api(method = 'GET', body, leadId = '') {
-        const response = await fetch(`${config.apiBase}/admin/leads${leadId ? '/' + encodeURIComponent(leadId) : ''}`, {
+    async function adminApi(path, method = 'GET', body) {
+        const response = await fetch(`${config.apiBase}${path}`, {
             method,
             headers: { authorization: `Bearer ${token}`, 'content-type':'application/json' },
             body: body ? JSON.stringify(body) : undefined,
@@ -42,11 +42,33 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardError.textContent = '';
         rows.innerHTML = '<tr><td colspan="7" class="empty">Loading briefs…</td></tr>';
         try {
-            leads = (await api()).leads || [];
+            leads = (await adminApi('/admin/leads')).leads || [];
             render();
         } catch (error) {
             dashboardError.textContent = error.message;
             rows.innerHTML = '<tr><td colspan="7" class="empty">No lead data available.</td></tr>';
+        }
+    }
+
+    async function loadQuiz() {
+        const quizRows = document.getElementById('quizRows');
+        try {
+            const data = await adminApi('/admin/quiz');
+            const results = data.results || [];
+            document.getElementById('metricQuiz').textContent = `${results.length} completion${results.length === 1 ? '' : 's'}`;
+            if (!results.length) {
+                quizRows.innerHTML = '<tr><td colspan="5" class="empty">No quiz completions yet.</td></tr>';
+                return;
+            }
+            quizRows.innerHTML = results.slice(0, 100).map(r => `<tr>
+                <td>${escapeHtml(new Date(r.created_at).toLocaleDateString())}</td>
+                <td><strong>${escapeHtml(r.traveler_persona)}</strong></td>
+                <td>${escapeHtml(r.selected_transit || '—')}</td>
+                <td>${escapeHtml(r.selected_lodging || '—')}</td>
+                <td>${escapeHtml(r.selected_finale || '—')}</td>
+            </tr>`).join('');
+        } catch (error) {
+            quizRows.innerHTML = '<tr><td colspan="5" class="empty">Quiz data unavailable.</td></tr>';
         }
     }
 
@@ -79,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rows.querySelectorAll('select[data-lead-id]').forEach(select => select.addEventListener('change', async () => {
             select.disabled = true;
             try {
-                const { lead } = await api('PATCH', { status: select.value }, select.dataset.leadId);
+                const { lead } = await adminApi(`/admin/leads/${encodeURIComponent(select.dataset.leadId)}`, 'PATCH', { status: select.value });
                 const index = leads.findIndex(item => item.id === lead.id);
                 if (index >= 0) leads[index] = lead;
                 render();
@@ -92,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardPanel.hidden = false;
         document.getElementById('adminIdentity').textContent = sessionStorage.getItem('roar_admin_email') || 'Authorized admin';
         loadLeads();
+        loadQuiz();
     }
 
     function logout() {
@@ -111,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { loginError.textContent = error.message; }
     });
     document.getElementById('adminLogout').addEventListener('click', logout);
-    document.getElementById('refreshLeads').addEventListener('click', loadLeads);
+    document.getElementById('refreshLeads').addEventListener('click', () => { loadLeads(); loadQuiz(); });
     document.getElementById('statusFilter').addEventListener('change', render);
     document.getElementById('leadSearch').addEventListener('input', render);
 

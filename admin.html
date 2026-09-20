@@ -11,6 +11,10 @@
       <div class="toolbar"><label>Filter status<select id="statusFilter"><option value="all">All leads</option><option value="new">New</option><option value="reviewing">Reviewing</option><option value="contacted">Contacted</option><option value="proposal_sent">Proposal sent</option><option value="won">Won</option><option value="lost">Lost</option></select></label><label>Search<input id="leadSearch" type="search" placeholder="Name, email, objective…"></label></div>
       <div id="dashboardError" class="error" role="alert"></div>
       <div class="lead-table-box"><table><thead><tr><th>Received</th><th>Client</th><th>Journey</th><th>Guests</th><th>Tier</th><th>Estimate</th><th>Status</th></tr></thead><tbody id="leadRows"><tr><td colspan="7" class="empty">Loading briefs…</td></tr></tbody></table></div>
+      <section class="quiz-panel" style="margin-top:40px">
+        <header class="dash-header" style="margin-bottom:20px"><h2 style="font-size:20px">Quiz Persona Metrics</h2><span id="metricQuiz" class="metric-pill">0 completions</span></header>
+        <div class="lead-table-box"><table><thead><tr><th>Date</th><th>Persona</th><th>Transit</th><th>Lodging</th><th>Finale</th></tr></thead><tbody id="quizRows"><tr><td colspan="5" class="empty">Loading quiz data…</td></tr></tbody></table></div>
+      </section>
     </section>
   </main>
   <script src="site-config.js"></script><script src="admin.js"></script>
