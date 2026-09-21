@@ -204,13 +204,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (id === 'offersSection') loadOffers();
     }
 
-    function showDashboard() {
+    async function showDashboard() {
         loginPanel.hidden = true;
         dashboardPanel.hidden = false;
+        document.querySelector('.admin-sidebar').hidden = false;
         document.getElementById('adminIdentity').textContent = sessionStorage.getItem('roar_admin_email') || 'Authorized admin';
-        loadLeads();
-        loadQuiz();
+        await loadLeads();
         loadOffers();
+        loadQuiz();
     }
 
     function logout() {
@@ -218,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('roar_admin_token');
         sessionStorage.removeItem('roar_admin_email');
         dashboardPanel.hidden = true;
+        document.querySelector('.admin-sidebar').hidden = true;
         loginPanel.hidden = false;
     }
 
