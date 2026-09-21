@@ -180,9 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${escapeHtml(lead.tier_preference || '—')}</td>
             <td>${formatMoney(lead.estimated_value)}</td>
             <td>${statusBadge(lead.status)}</td>
-            <td>
+            <td class="action-cell">
                 <select class="status-select" data-lead-id="${escapeHtml(lead.id)}">${Object.entries(statusLabels).map(([value,label]) => `<option value="${value}" ${lead.status===value?'selected':''}>${label}</option>`).join('')}</select>
                 <button class="view-btn" data-lead-id="${escapeHtml(lead.id)}" type="button"><i class="fa-solid fa-eye"></i> View</button>
+                <button class="view-btn edit-btn" data-lead-id="${escapeHtml(lead.id)}" type="button"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                <button class="danger-btn" data-lead-id="${escapeHtml(lead.id)}" type="button"><i class="fa-solid fa-trash-can"></i> Delete</button>
             </td>
         </tr>`).join('');
 
@@ -198,6 +200,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
 
         rows.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => openModal(btn.dataset.leadId)));
+        rows.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => openEditModal(btn.dataset.leadId)));
+        rows.querySelectorAll('.danger-btn').forEach(btn => btn.addEventListener('click', () => deleteLead(btn.dataset.leadId)));
+    }
+
+    function openEditModal(id) {
+        const lead = leads.find(l => l.id === id);
+        if (!lead) return;
+        document.getElementById('editLeadId').value = lead.id;
+        document.getElementById('editClientName').value = lead.client_name || '';
+        document.getElementById('editClientEmail').value = lead.client_email || '';
+        document.getElementById('editTargetDates').value = lead.target_dates || '';
+        document.getElementById('editTotalGuests').value = lead.total_guests || '';
+        document.getElementById('editTierPreference').value = lead.tier_preference || '';
+        document.getElementById('editPrimaryObjective').value = lead.primary_objective || '';
+        document.getElementById('editEstimatedValue').value = lead.estimated_value || '';
+        document.getElementById('editStatus').value = lead.status || 'new';
+        document.getElementById('editNotes').value = lead.notes || '';
+        document.getElementById('editModal').hidden = false;
+    }
+
+    async function deleteLead(id) {
+        const lead = leads.find(l => l.id === id);
+        if (!lead) return;
+        if (!confirm(`Delete the brief from ${lead.client_name}? This cannot be undone.`)) return;
+        try {
+            await adminApi(`/admin/leads/${encodeURIComponent(id)}`, 'DELETE');
+            leads = leads.filter(l => l.id !== id);
+            renderLeads();
+            updateMetrics();
+        } catch (error) { dashboardError.textContent = error.message; }
+    }
+
+    async function submitEdit(event) {
+        event.preventDefault();
+        const id = document.getElementById('editLeadId').value;
+        const payload = {
+            client_name: document.getElementById('editClientName').value.trim(),
+            client_email: document.getElementById('editClientEmail').value.trim(),
+            target_dates: document.getElementById('editTargetDates').value.trim(),
+            total_guests: Number(document.getElementById('editTotalGuests').value),
+            tier_preference: document.getElementById('editTierPreference').value.trim(),
+            primary_objective: document.getElementById('editPrimaryObjective').value.trim(),
+            estimated_value: document.getElementById('editEstimatedValue').value ? Number(document.getElementById('editEstimatedValue').value) : null,
+            status: document.getElementById('editStatus').value,
+            notes: document.getElementById('editNotes').value.trim(),
+        };
+        try {
+            const { lead } = await adminApi(`/admin/leads/${encodeURIComponent(id)}`, 'PUT', payload);
+            const index = leads.findIndex(l => l.id === lead.id);
+            if (index >= 0) leads[index] = lead;
+            renderLeads();
+            updateMetrics();
+            document.getElementById('editModal').hidden = true;
+        } catch (error) { dashboardError.textContent = error.message; }
     }
 
     function openModal(id) {
@@ -284,6 +340,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportLeads').addEventListener('click', exportCSV);
     document.querySelector('.modal-close').addEventListener('click', closeModal);
     document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    document.getElementById('editModal').querySelector('.modal-close').addEventListener('click', () => document.getElementById('editModal').hidden = true);
+    document.getElementById('editModal').querySelector('.modal-backdrop').addEventListener('click', () => document.getElementById('editModal').hidden = true);
+    document.getElementById('editCancel').addEventListener('click', () => document.getElementById('editModal').hidden = true);
+    document.getElementById('editLeadForm').addEventListener('submit', submitEdit);
 
     if (token) showDashboard();
 });

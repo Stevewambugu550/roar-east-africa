@@ -151,9 +151,17 @@ function createJsonPool() {
             };
             if (s.includes('set status=')) lead.status = getParam('status');
             if (s.includes('launch_offer_claimed=true')) { lead.launch_offer_claimed = true; lead.launch_offer_percent = 10; }
+            const editable = ['client_name','client_email','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
+            editable.forEach(f => { const v = getParam(f); if (v !== undefined) lead[f] = v; });
             lead.updated_at = now();
             save(data);
             return Promise.resolve({ rows: [pick(lead)] });
+        }
+        if (s.startsWith('delete from public.roar_leads')) {
+            data.leads = data.leads.filter(l => l.id !== params[0]);
+            data.claims = data.claims.filter(c => c.lead_id !== params[0]);
+            save(data);
+            return Promise.resolve({ rows: [] });
         }
         if (s.startsWith('insert into public.roar_launch_claims')) {
             const [lead_id, customer_id] = params;
@@ -440,6 +448,33 @@ router.patch('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
         console.error('Roar lead update error:', error.message);
         res.status(500).json({ message:'Unable to update lead.' });
     } finally { client.release(); }
+});
+
+router.put('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
+    const allowed = ['client_name','client_email','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
+    const fields = [];
+    const values = [];
+    let index = 0;
+    allowed.forEach(f => {
+        if (req.body[f] !== undefined) {
+            index += 1;
+            fields.push(`${f}=$${index}`);
+            values.push(f === 'total_guests' || f === 'estimated_value' ? Number(req.body[f]) : clean(req.body[f], 3000));
+        }
+    });
+    if (!fields.length) return res.status(400).json({ message: 'No fields to update.' });
+    if (req.body.status && !statuses.has(req.body.status)) return res.status(400).json({ message: 'Invalid lead status.' });
+    index += 1;
+    values.push(req.params.id);
+    const { rows } = await pool.query(`update public.roar_leads set ${fields.join(',')},updated_at=now() where id=$${index} returning *`, values);
+    if (!rows.length) return res.status(404).json({ message: 'Lead not found.' });
+    res.json({ lead: rows[0] });
+});
+
+router.delete('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
+    const { rows } = await pool.query('delete from public.roar_leads where id=$1 returning id', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Lead not found.' });
+    res.json({ success: true });
 });
 
 const quizLimit = rateLimit(60 * 60 * 1000, 20);

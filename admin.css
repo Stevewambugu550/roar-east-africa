@@ -424,6 +424,14 @@ select.status-select {
 
 .view-btn:hover { background: rgba(21,29,22,.05); }
 
+.action-cell {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
 /* Status overview bars */
 .status-bars {
   display: grid;
@@ -588,6 +596,57 @@ select.status-select {
   margin: 0;
   white-space: pre-wrap;
 }
+
+.edit-form .form-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.edit-form .form-grid label {
+  color: var(--muted);
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.edit-form .form-grid input,
+.edit-form .form-grid select,
+.edit-form .form-grid textarea {
+  background: #f8faf8;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 13px;
+  margin-top: 6px;
+  outline: none;
+  padding: 11px 12px;
+  width: 100%;
+}
+
+.edit-form .form-grid label.full { grid-column: 1 / -1; }
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.danger-btn {
+  background: transparent;
+  border: 1px solid rgba(176,58,46,.3);
+  border-radius: 6px;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 7px 12px;
+}
+
+.danger-btn:hover { background: rgba(176,58,46,.08); }
 
 /* Responsive */
 @media (max-width: 992px) {

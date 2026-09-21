@@ -146,6 +146,32 @@
     </div>
   </div>
 
+  <div id="editModal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <button class="modal-close" type="button" aria-label="Close">&times;</button>
+      <h2>Edit Lead</h2>
+      <form id="editLeadForm" class="edit-form">
+        <input type="hidden" id="editLeadId">
+        <div class="form-grid">
+          <label>Client name<input id="editClientName" required></label>
+          <label>Email<input id="editClientEmail" type="email" required></label>
+          <label>Travel dates<input id="editTargetDates"></label>
+          <label>Guests<input id="editTotalGuests" type="number" min="1" max="100"></label>
+          <label>Travel style<input id="editTierPreference"></label>
+          <label>Objective<input id="editPrimaryObjective"></label>
+          <label>Estimated value ($)<input id="editEstimatedValue" type="number" min="0" step="0.01"></label>
+          <label>Status<select id="editStatus"><option value="new">New</option><option value="reviewing">Reviewing</option><option value="contacted">Contacted</option><option value="proposal_sent">Proposal sent</option><option value="won">Won</option><option value="lost">Lost</option></select></label>
+          <label class="full">Notes<textarea id="editNotes" rows="4"></textarea></label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-outline" id="editCancel">Cancel</button>
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="site-config.js?v=5"></script>
   <script src="admin.js?v=5"></script>
 </body>
