@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let token = sessionStorage.getItem('roar_admin_token');
     let leads = [];
     let quizResults = [];
+    let customers = [];
+    let reviews = [];
 
     const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
     const formatMoney = value => value == null ? '—' : new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(value);
@@ -62,20 +64,105 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerRows = document.getElementById('customerRows');
         try {
             const data = await adminApi('/admin/customers');
-            const customers = data.customers || [];
-            document.getElementById('metricCustomers').textContent = `${customers.length} account${customers.length === 1 ? '' : 's'}`;
+            customers = data.customers || [];
+            const active = customers.filter(c => (c.account_status || 'active') === 'active').length;
+            document.getElementById('metricCustomers').textContent = `${active}/${customers.length} active`;
             if (!customers.length) {
-                customerRows.innerHTML = '<tr><td colspan="4" class="empty">No customer accounts yet.</td></tr>';
+                customerRows.innerHTML = '<tr><td colspan="6" class="empty">No customer accounts yet.</td></tr>';
                 return;
             }
-            customerRows.innerHTML = customers.slice(0, 200).map(c => `<tr>
+            customerRows.innerHTML = customers.slice(0, 200).map(c => {
+                const suspended = (c.account_status || 'active') === 'suspended';
+                return `<tr>
                 <td>${escapeHtml(new Date(c.created_at).toLocaleDateString())}</td>
                 <td><strong>${escapeHtml(`${c.first_name} ${c.last_name}`)}</strong></td>
                 <td>${escapeHtml(c.email)}</td>
-                <td><span class="status-badge ${c.role === 'admin' ? 'status-reviewing' : 'status-new'}">${escapeHtml(c.role)}</span></td>
-            </tr>`).join('');
+                <td>
+                    <select class="status-select role-select" data-customer-id="${escapeHtml(c.id)}">
+                        <option value="customer" ${c.role === 'customer' ? 'selected' : ''}>Customer</option>
+                        <option value="admin" ${c.role === 'admin' ? 'selected' : ''}>Admin</option>
+                    </select>
+                </td>
+                <td><span class="status-badge ${suspended ? 'status-lost' : 'status-won'}">${suspended ? 'Suspended' : 'Active'}</span></td>
+                <td class="action-cell">
+                    <button class="view-btn suspend-btn" data-customer-id="${escapeHtml(c.id)}" data-status="${suspended ? 'active' : 'suspended'}" type="button"><i class="fa-solid ${suspended ? 'fa-unlock' : 'fa-ban'}"></i> ${suspended ? 'Restore' : 'Suspend'}</button>
+                    <button class="danger-btn customer-delete-btn" data-customer-id="${escapeHtml(c.id)}" type="button"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                </td>
+            </tr>`; }).join('');
+
+            customerRows.querySelectorAll('.role-select').forEach(select => select.addEventListener('change', async () => {
+                select.disabled = true;
+                try {
+                    await adminApi(`/admin/customers/${encodeURIComponent(select.dataset.customerId)}`, 'PATCH', { role: select.value });
+                    loadCustomers();
+                } catch (error) { dashboardError.textContent = error.message; select.disabled = false; }
+            }));
+            customerRows.querySelectorAll('.suspend-btn').forEach(btn => btn.addEventListener('click', async () => {
+                const c = customers.find(x => x.id === btn.dataset.customerId);
+                const verb = btn.dataset.status === 'suspended' ? 'suspend login access for' : 'restore login access for';
+                if (!confirm(`Are you sure you want to ${verb} ${c ? `${c.first_name} ${c.last_name}` : 'this account'}?`)) return;
+                try {
+                    await adminApi(`/admin/customers/${encodeURIComponent(btn.dataset.customerId)}`, 'PATCH', { account_status: btn.dataset.status });
+                    loadCustomers();
+                } catch (error) { dashboardError.textContent = error.message; }
+            }));
+            customerRows.querySelectorAll('.customer-delete-btn').forEach(btn => btn.addEventListener('click', async () => {
+                const c = customers.find(x => x.id === btn.dataset.customerId);
+                if (!confirm(`Permanently delete the account for ${c ? `${c.first_name} ${c.last_name} (${c.email})` : 'this customer'}? This cannot be undone.`)) return;
+                try {
+                    await adminApi(`/admin/customers/${encodeURIComponent(btn.dataset.customerId)}`, 'DELETE');
+                    loadCustomers();
+                } catch (error) { dashboardError.textContent = error.message; }
+            }));
         } catch (error) {
-            customerRows.innerHTML = '<tr><td colspan="4" class="empty">Customer data unavailable.</td></tr>';
+            customerRows.innerHTML = '<tr><td colspan="6" class="empty">Customer data unavailable.</td></tr>';
+        }
+    }
+
+    async function loadReviews() {
+        const reviewRows = document.getElementById('reviewRows');
+        try {
+            const data = await adminApi('/admin/reviews');
+            reviews = data.reviews || [];
+            const pending = reviews.filter(r => r.status === 'pending').length;
+            document.getElementById('metricReviews').textContent = `${reviews.length} review${reviews.length === 1 ? '' : 's'}${pending ? ` · ${pending} pending` : ''}`;
+            if (!reviews.length) {
+                reviewRows.innerHTML = '<tr><td colspan="7" class="empty">No reviews yet.</td></tr>';
+                return;
+            }
+            reviewRows.innerHTML = reviews.slice(0, 200).map(r => `<tr>
+                <td>${escapeHtml(new Date(r.created_at).toLocaleDateString())}</td>
+                <td><strong>${escapeHtml(r.reviewer_name)}</strong><span class="sub">${escapeHtml(r.reviewer_location || '')}${r.is_demo ? ' · demo' : ''}</span></td>
+                <td><span class="stars" style="color:#d4af37;letter-spacing:2px">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span></td>
+                <td>${escapeHtml(r.trip_name || '—')}</td>
+                <td class="review-cell">${escapeHtml(r.review_text)}</td>
+                <td><span class="status-badge status-${r.status === 'approved' ? 'won' : r.status === 'rejected' ? 'lost' : 'new'}">${escapeHtml(r.status)}</span></td>
+                <td class="action-cell">
+                    <select class="status-select review-status-select" data-review-id="${escapeHtml(r.id)}">
+                        <option value="pending" ${r.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="approved" ${r.status === 'approved' ? 'selected' : ''}>Approve</option>
+                        <option value="rejected" ${r.status === 'rejected' ? 'selected' : ''}>Reject</option>
+                    </select>
+                    <button class="danger-btn review-delete-btn" data-review-id="${escapeHtml(r.id)}" type="button"><i class="fa-solid fa-trash-can"></i> Delete</button>
+                </td>
+            </tr>`).join('');
+
+            reviewRows.querySelectorAll('.review-status-select').forEach(select => select.addEventListener('change', async () => {
+                select.disabled = true;
+                try {
+                    await adminApi(`/admin/reviews/${encodeURIComponent(select.dataset.reviewId)}`, 'PATCH', { status: select.value });
+                    loadReviews();
+                } catch (error) { dashboardError.textContent = error.message; select.disabled = false; }
+            }));
+            reviewRows.querySelectorAll('.review-delete-btn').forEach(btn => btn.addEventListener('click', async () => {
+                if (!confirm('Permanently delete this review?')) return;
+                try {
+                    await adminApi(`/admin/reviews/${encodeURIComponent(btn.dataset.reviewId)}`, 'DELETE');
+                    loadReviews();
+                } catch (error) { dashboardError.textContent = error.message; }
+            }));
+        } catch (error) {
+            reviewRows.innerHTML = '<tr><td colspan="7" class="empty">Review data unavailable.</td></tr>';
         }
     }
 
@@ -314,6 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadQuiz();
         loadOffers();
         loadCustomers();
+        loadReviews();
     }
 
     function logout() {
@@ -334,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('adminLogout').addEventListener('click', logout);
-    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); loadCustomers(); });
+    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); loadCustomers(); loadReviews(); });
     document.getElementById('statusFilter').addEventListener('change', renderLeads);
     document.getElementById('leadSearch').addEventListener('input', renderLeads);
     document.getElementById('exportLeads').addEventListener('click', exportCSV);

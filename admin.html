@@ -7,7 +7,7 @@
   <title>Expedition Control Desk | Roar East Africa</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="admin.css?v=5">
+  <link rel="stylesheet" href="admin.css?v=6">
 </head>
 <body>
 
@@ -96,9 +96,24 @@
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Joined</th><th>Name</th><th>Email</th><th>Role</th></tr>
+              <tr><th>Joined</th><th>Name</th><th>Email</th><th>Role</th><th>Access</th><th>Actions</th></tr>
             </thead>
-            <tbody id="customerRows"><tr><td colspan="4" class="empty">Loading customers…</td></tr></tbody>
+            <tbody id="customerRows"><tr><td colspan="6" class="empty">Loading customers…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <h2><i class="fa-solid fa-star"></i> Guest Reviews</h2>
+          <span id="metricReviews" class="metric-pill">0 reviews</span>
+        </header>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Reviewer</th><th>Rating</th><th>Trip</th><th>Review</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="reviewRows"><tr><td colspan="7" class="empty">Loading reviews…</td></tr></tbody>
           </table>
         </div>
       </section>
@@ -172,7 +187,7 @@
     </div>
   </div>
 
-  <script src="site-config.js?v=5"></script>
-  <script src="admin.js?v=5"></script>
+  <script src="site-config.js?v=6"></script>
+  <script src="admin.js?v=6"></script>
 </body>
 </html>

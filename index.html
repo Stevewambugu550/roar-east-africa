@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <nav class="navbar" aria-label="Main navigation">
@@ -294,6 +294,24 @@
       </div>
     </section>
 
+    <section id="guest-reviews" class="reviews-section guest-reviews-section">
+      <div class="section-header"><span class="sub">Guest Stories</span><h2>Rated by the travelers who matter most.</h2><p id="reviewSummary" class="review-summary">Every review below is held for approval by our team before it appears.</p></div>
+      <div class="reviews-grid" id="guestReviews"><p class="reviews-loading">Loading guest stories…</p></div>
+      <div class="review-form-wrap">
+        <h3>Traveled with us? Share your experience.</h3>
+        <form id="reviewForm" class="review-form">
+          <div class="review-form-row">
+            <label>Your name<input id="reviewName" required maxlength="120" placeholder="e.g. Sarah M."></label>
+            <label>Country / City<input id="reviewLocation" maxlength="120" placeholder="e.g. London, UK"></label>
+            <label>Safari taken<select id="reviewTrip"><option value="">Select a journey</option><option>Sky Safari &amp; Mara Migration</option><option>Grand Savanna &amp; Diani Waters</option><option>Kenya's Iconic Conservancies</option><option>Custom multi-destination safari</option><option>Other</option></select></label>
+            <label>Rating<select id="reviewRating" required><option value="">Select</option><option value="5">★★★★★ Excellent</option><option value="4">★★★★ Very good</option><option value="3">★★★ Good</option><option value="2">★★ Fair</option><option value="1">★ Poor</option></select></label>
+          </div>
+          <label>Your review<textarea id="reviewText" required minlength="10" maxlength="2000" rows="4" placeholder="Tell future travelers what stood out…"></textarea></label>
+          <div class="review-form-foot"><button type="submit" class="pkg-btn">Submit Review</button><span id="reviewFormMsg" role="status"></span></div>
+        </form>
+      </div>
+    </section>
+
     <section id="leadership" class="leadership-section">
       <div class="section-header"><span class="sub">East African Leadership</span><h2>Built with local roots and personal accountability.</h2><p>Roar East Africa is led by an East African family committed to thoughtful planning, trusted partnerships, and attentive guest care.</p></div>
       <div class="leadership-grid"><article><div class="leader-mark">SW</div><div><span>Founder &amp; Chief Executive Officer</span><h3>Stephen Wambugu</h3><p>Stephen leads Roar East Africa’s strategy, guest experience, and partner relationships.</p><a href="https://wa.me/13174463498?text=Hello%20Stephen%2C%20I%27d%20like%20to%20plan%20a%20safari%20with%20Roar%20East%20Africa." target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> +1 317 446 3498</a></div></article><article><div class="leader-mark">MM</div><div><span>Director</span><h3>Milka Macharia</h3><p>Milka oversees client care, journey coordination, and the details that turn an itinerary into a seamless experience.</p><a href="https://wa.me/13174454954?text=Hello%20Milka%2C%20I%27d%20like%20to%20plan%20a%20safari%20with%20Roar%20East%20Africa." target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> +1 317 445 4954</a></div></article></div>
@@ -401,9 +419,10 @@
     <i class="fa-brands fa-whatsapp"></i>
     <span class="chat-label">Chat Live with an Expert</span>
   </a>
-  <script src="site-config.js?v=4"></script>
-  <script src="account-system.js?v=4"></script>
-  <script src="app.js?v=4"></script>
-  <script src="analytics.js?v=4"></script>
+  <script src="site-config.js?v=5"></script>
+  <script src="account-system.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+  <script src="reviews.js?v=5"></script>
+  <script src="analytics.js?v=5"></script>
 </body>
 </html>

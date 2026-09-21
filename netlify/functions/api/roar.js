@@ -12,7 +12,7 @@ function createJsonPool() {
     const dbPath = path.join(__dirname, 'roar-local-db.json');
     function load() {
         try { return JSON.parse(fs.readFileSync(dbPath, 'utf8')); }
-        catch { return { customers: [], leads: [], claims: [], quiz: [] }; }
+        catch { return { customers: [], leads: [], claims: [], quiz: [], reviews: [] }; }
     }
     function save(data) { fs.writeFileSync(dbPath, JSON.stringify(data, null, 2)); }
     const now = () => new Date().toISOString();
@@ -25,6 +25,7 @@ function createJsonPool() {
         if (!data.leads) data.leads = [];
         if (!data.claims) data.claims = [];
         if (!data.quiz) { data.quiz = []; save(data); }
+        if (!data.reviews) { data.reviews = []; save(data); }
 
         if (s.startsWith('create table') || s.startsWith('create index') || s.startsWith('alter table')) {
             return Promise.resolve({ rows: [] });
@@ -64,6 +65,7 @@ function createJsonPool() {
                 first_name: params[2],
                 last_name: params[3],
                 role: 'customer',
+                account_status: 'active',
                 email_verified: params[4],
                 verification_token_hash: params[5],
                 verification_expires_at: params[6],
@@ -76,6 +78,7 @@ function createJsonPool() {
         }
         if (s.startsWith('select count(*)')) {
             if (s.includes('roar_launch_claims')) return Promise.resolve({ rows: [{ n: data.claims.length }] });
+            if (s.includes('roar_customers') && s.includes("role='admin'")) return Promise.resolve({ rows: [{ n: data.customers.filter(c => c.role === 'admin' && (c.account_status || 'active') === 'active').length }] });
         }
         if (s.startsWith('select') && s.includes('from public.roar_customers')) {
             let rows = data.customers;
@@ -96,7 +99,7 @@ function createJsonPool() {
                 const m = sql.match(new RegExp(`${name}\\s*=\\s*\\$([0-9]+)`, 'i'));
                 return m ? params[Number(m[1]) - 1] : undefined;
             };
-            const fields = ['email','password_hash','first_name','last_name','role','email_verified','verification_token_hash','verification_expires_at'];
+            const fields = ['email','password_hash','first_name','last_name','role','account_status','email_verified','verification_token_hash','verification_expires_at'];
             for (const f of fields) {
                 const v = getParam(f);
                 if (v !== undefined) customer[f] = v;
@@ -193,6 +196,43 @@ function createJsonPool() {
             if (s.includes('order by created_at desc')) rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             if (s.includes('limit 500')) rows = rows.slice(0, 500);
             return Promise.resolve({ rows: rows.map(pick) });
+        }
+        if (s.startsWith('insert into public.roar_reviews')) {
+            const review = {
+                id: uuid(),
+                reviewer_name: params[0],
+                reviewer_location: params[1],
+                trip_name: params[2],
+                rating: params[3],
+                review_text: params[4],
+                status: params[5] || 'pending',
+                is_demo: params[6] === true,
+                created_at: now(),
+            };
+            data.reviews.push(review);
+            save(data);
+            return Promise.resolve({ rows: [pick(review)] });
+        }
+        if (s.startsWith('select') && s.includes('from public.roar_reviews')) {
+            let rows = [...data.reviews];
+            if (s.includes("where status='approved'")) rows = rows.filter(r => r.status === 'approved');
+            if (s.includes('order by created_at desc')) rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const lim = s.match(/limit (\d+)/);
+            if (lim) rows = rows.slice(0, Number(lim[1]));
+            return Promise.resolve({ rows: rows.map(pick) });
+        }
+        if (s.startsWith('update public.roar_reviews')) {
+            const review = data.reviews.find(r => r.id === params[params.length - 1]);
+            if (!review) return Promise.resolve({ rows: [] });
+            if (s.includes('set status=')) review.status = params[0];
+            save(data);
+            return Promise.resolve({ rows: [pick(review)] });
+        }
+        if (s.startsWith('delete from public.roar_reviews')) {
+            const found = data.reviews.some(r => r.id === params[0]);
+            data.reviews = data.reviews.filter(r => r.id !== params[0]);
+            save(data);
+            return Promise.resolve({ rows: found ? [{ id: params[0] }] : [] });
         }
         return Promise.resolve({ rows: [] });
     }
@@ -302,6 +342,19 @@ async function init() {
             source_ip inet,
             created_at timestamptz not null default now()
         );
+        alter table public.roar_customers add column if not exists account_status text not null default 'active';
+        create table if not exists public.roar_reviews (
+            id uuid primary key default gen_random_uuid(),
+            reviewer_name text not null check (char_length(reviewer_name) between 1 and 120),
+            reviewer_location text check (char_length(reviewer_location) <= 120),
+            trip_name text check (char_length(trip_name) <= 150),
+            rating integer not null check (rating between 1 and 5),
+            review_text text not null check (char_length(review_text) between 10 and 2000),
+            status text not null default 'pending' check (status in ('pending','approved','rejected')),
+            is_demo boolean not null default false,
+            created_at timestamptz not null default now()
+        );
+        create index if not exists roar_reviews_status_idx on public.roar_reviews(status);
     `);
 }
 
@@ -316,17 +369,25 @@ function requireCustomer(req, res, next) {
         const decoded = jwt.verify(token, secret);
         if (decoded.app !== 'roar') throw new Error('Wrong application token');
         req.roarUser = decoded;
-        next();
     } catch {
-        res.status(401).json({ message: 'Session invalid or expired.' });
+        return res.status(401).json({ message: 'Session invalid or expired.' });
     }
+    pool.query('select account_status from public.roar_customers where id=$1', [req.roarUser.id])
+        .then(({ rows }) => {
+            if (!rows.length) return res.status(401).json({ message: 'Account not found.' });
+            if ((rows[0].account_status || 'active') === 'suspended') {
+                return res.status(403).json({ message: 'This account has been suspended.' });
+            }
+            next();
+        })
+        .catch(() => res.status(500).json({ message: 'Unable to verify account.' }));
 }
 
 function requireRoarAdmin(req, res, next) {
     requireCustomer(req, res, async () => {
         try {
-            const { rows } = await pool.query('select role from public.roar_customers where id=$1', [req.roarUser.id]);
-            if (rows[0]?.role !== 'admin') {
+            const { rows } = await pool.query('select role, account_status from public.roar_customers where id=$1', [req.roarUser.id]);
+            if (rows[0]?.role !== 'admin' || (rows[0]?.account_status || 'active') === 'suspended') {
                 return res.status(403).json({ message: 'Roar administrator access required.' });
             }
             next();
@@ -388,6 +449,9 @@ router.post('/auth/login', loginLimit, async (req, res) => {
     const customer = rows[0];
     if (!customer || !await bcrypt.compare(String(req.body.password || ''), customer.password_hash)) {
         return res.status(401).json({ message: 'Invalid email or password.' });
+    }
+    if ((customer.account_status || 'active') === 'suspended') {
+        return res.status(403).json({ message: 'This account has been suspended. Please contact Roar East Africa.' });
     }
     res.json({ token: signCustomer(customer), user: { id: customer.id, email: customer.email, firstName: customer.first_name, lastName: customer.last_name, role: customer.role } });
 });
@@ -506,8 +570,103 @@ router.get('/admin/quiz', requireRoarAdmin, async (_req, res) => {
 });
 
 router.get('/admin/customers', requireRoarAdmin, async (_req, res) => {
-    const { rows } = await pool.query('select id, email, first_name, last_name, role, created_at from public.roar_customers order by created_at desc limit 500');
+    const { rows } = await pool.query('select id, email, first_name, last_name, role, account_status, created_at from public.roar_customers order by created_at desc limit 500');
     res.json({ customers: rows });
+});
+
+router.patch('/admin/customers/:id', requireRoarAdmin, async (req, res) => {
+    const updates = {};
+    if (req.body.role !== undefined) {
+        const role = clean(req.body.role, 20);
+        if (!['customer', 'admin'].includes(role)) return res.status(400).json({ message: 'Invalid role.' });
+        updates.role = role;
+    }
+    if (req.body.account_status !== undefined || req.body.accountStatus !== undefined) {
+        const status = clean(req.body.account_status ?? req.body.accountStatus, 20);
+        if (!['active', 'suspended'].includes(status)) return res.status(400).json({ message: 'Invalid account status.' });
+        updates.account_status = status;
+    }
+    if (!Object.keys(updates).length) return res.status(400).json({ message: 'No fields to update.' });
+    const { rows: targetRows } = await pool.query('select id, role, account_status from public.roar_customers where id=$1 limit 1', [req.params.id]);
+    const target = targetRows[0];
+    if (!target) return res.status(404).json({ message: 'Customer not found.' });
+    if (req.params.id === req.roarUser.id && (updates.role === 'customer' || updates.account_status === 'suspended')) {
+        return res.status(400).json({ message: 'You cannot suspend or demote your own administrator account.' });
+    }
+    const removingAdmin = target.role === 'admin' && (updates.role === 'customer' || updates.account_status === 'suspended');
+    if (removingAdmin) {
+        const { rows: countRows } = await pool.query("select count(*)::int n from public.roar_customers where role='admin' and coalesce(account_status,'active')='active'");
+        if (Number(countRows[0].n) <= 1) return res.status(400).json({ message: 'At least one active administrator account must remain.' });
+    }
+    const fields = [];
+    const values = [];
+    let index = 0;
+    for (const [key, value] of Object.entries(updates)) {
+        index += 1;
+        fields.push(`${key}=$${index}`);
+        values.push(value);
+    }
+    index += 1;
+    values.push(req.params.id);
+    const { rows } = await pool.query(`update public.roar_customers set ${fields.join(',')},updated_at=now() where id=$${index} returning id, email, first_name, last_name, role, account_status, created_at`, values);
+    if (!rows.length) return res.status(404).json({ message: 'Customer not found.' });
+    res.json({ customer: rows[0] });
+});
+
+router.delete('/admin/customers/:id', requireRoarAdmin, async (req, res) => {
+    if (req.params.id === req.roarUser.id) return res.status(400).json({ message: 'You cannot delete your own account.' });
+    const { rows: targetRows } = await pool.query('select id, role from public.roar_customers where id=$1 limit 1', [req.params.id]);
+    const target = targetRows[0];
+    if (!target) return res.status(404).json({ message: 'Customer not found.' });
+    if (target.role === 'admin') {
+        const { rows: countRows } = await pool.query("select count(*)::int n from public.roar_customers where role='admin' and coalesce(account_status,'active')='active'");
+        if (Number(countRows[0].n) <= 1) return res.status(400).json({ message: 'Cannot delete the last administrator account.' });
+    }
+    await pool.query('delete from public.roar_customers where id=$1', [req.params.id]);
+    res.json({ success: true });
+});
+
+const reviewLimit = rateLimit(60 * 60 * 1000, 5);
+const reviewStatuses = new Set(['pending', 'approved', 'rejected']);
+
+router.get('/reviews', async (_req, res) => {
+    const { rows } = await pool.query("select reviewer_name, reviewer_location, trip_name, rating, review_text, is_demo, created_at from public.roar_reviews where status='approved' order by created_at desc limit 60");
+    res.json({ reviews: rows });
+});
+
+router.post('/reviews', reviewLimit, async (req, res) => {
+    const name = clean(req.body.reviewerName ?? req.body.name, 120);
+    const location = clean(req.body.reviewerLocation ?? req.body.location, 120);
+    const trip = clean(req.body.tripName ?? req.body.trip, 150);
+    const rating = Number(req.body.rating);
+    const text = clean(req.body.reviewText ?? req.body.text, 2000);
+    if (!name || !Number.isInteger(rating) || rating < 1 || rating > 5 || text.length < 10) {
+        return res.status(400).json({ message: 'Please provide your name, a rating from 1 to 5, and a review of at least 10 characters.' });
+    }
+    const { rows } = await pool.query(`
+        insert into public.roar_reviews (reviewer_name, reviewer_location, trip_name, rating, review_text, status)
+        values ($1,$2,$3,$4,$5,'pending') returning id
+    `, [name, location || null, trip || null, rating, text]);
+    res.status(201).json({ success: true, message: 'Thank you — your review will appear once our team approves it.', review: rows[0] });
+});
+
+router.get('/admin/reviews', requireRoarAdmin, async (_req, res) => {
+    const { rows } = await pool.query('select * from public.roar_reviews order by created_at desc limit 500');
+    res.json({ reviews: rows });
+});
+
+router.patch('/admin/reviews/:id', requireRoarAdmin, async (req, res) => {
+    const status = clean(req.body.status, 20);
+    if (!reviewStatuses.has(status)) return res.status(400).json({ message: 'Invalid review status.' });
+    const { rows } = await pool.query('update public.roar_reviews set status=$1 where id=$2 returning *', [status, req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Review not found.' });
+    res.json({ review: rows[0] });
+});
+
+router.delete('/admin/reviews/:id', requireRoarAdmin, async (req, res) => {
+    const { rows } = await pool.query('delete from public.roar_reviews where id=$1 returning id', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ message: 'Review not found.' });
+    res.json({ success: true });
 });
 
 router.get('/promotion', async (_req, res) => {
