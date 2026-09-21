@@ -58,6 +58,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function loadCustomers() {
+        const customerRows = document.getElementById('customerRows');
+        try {
+            const data = await adminApi('/admin/customers');
+            const customers = data.customers || [];
+            document.getElementById('metricCustomers').textContent = `${customers.length} account${customers.length === 1 ? '' : 's'}`;
+            if (!customers.length) {
+                customerRows.innerHTML = '<tr><td colspan="4" class="empty">No customer accounts yet.</td></tr>';
+                return;
+            }
+            customerRows.innerHTML = customers.slice(0, 200).map(c => `<tr>
+                <td>${escapeHtml(new Date(c.created_at).toLocaleDateString())}</td>
+                <td><strong>${escapeHtml(`${c.first_name} ${c.last_name}`)}</strong></td>
+                <td>${escapeHtml(c.email)}</td>
+                <td><span class="status-badge ${c.role === 'admin' ? 'status-reviewing' : 'status-new'}">${escapeHtml(c.role)}</span></td>
+            </tr>`).join('');
+        } catch (error) {
+            customerRows.innerHTML = '<tr><td colspan="4" class="empty">Customer data unavailable.</td></tr>';
+        }
+    }
+
+    function updateStatusBars() {
+        const counts = { new:0, reviewing:0, contacted:0, proposal_sent:0, won:0, lost:0 };
+        leads.forEach(l => { counts[l.status || 'new']++; });
+        const max = Math.max(...Object.values(counts), 1);
+        const bars = document.querySelectorAll('#statusBars .status-bar');
+        const keys = ['new','reviewing','contacted','proposal_sent','won','lost'];
+        bars.forEach((bar, index) => {
+            const count = counts[keys[index]] || 0;
+            bar.querySelector('strong').textContent = count;
+            bar.querySelector('i').style.width = `${(count / max) * 100}%`;
+        });
+    }
+
     async function loadQuiz() {
         const quizRows = document.getElementById('quizRows');
         try {
@@ -111,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('metricGuests').textContent = leads.reduce((sum, lead) => sum + Number(lead.total_guests || 0), 0);
         document.getElementById('metricRevenue').textContent = formatMoney(leads.reduce((sum, lead) => sum + Number(lead.estimated_value || 0), 0));
         document.getElementById('metricNew').textContent = leads.filter(lead => lead.status === 'new').length;
+        updateStatusBars();
     }
 
     function renderLeads() {
@@ -222,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadLeads();
         loadQuiz();
         loadOffers();
+        loadCustomers();
     }
 
     function logout() {
@@ -242,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('adminLogout').addEventListener('click', logout);
-    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); });
+    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); loadCustomers(); });
     document.getElementById('statusFilter').addEventListener('change', renderLeads);
     document.getElementById('leadSearch').addEventListener('input', renderLeads);
     document.getElementById('exportLeads').addEventListener('click', exportCSV);

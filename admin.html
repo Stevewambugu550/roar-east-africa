@@ -76,6 +76,35 @@
 
       <section class="card">
         <header class="card-header">
+          <h2><i class="fa-solid fa-chart-column"></i> Lead Status Overview</h2>
+        </header>
+        <div class="status-bars" id="statusBars">
+          <div class="status-bar"><span>New</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+          <div class="status-bar"><span>Reviewing</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+          <div class="status-bar"><span>Contacted</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+          <div class="status-bar"><span>Proposal sent</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+          <div class="status-bar"><span>Won</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+          <div class="status-bar"><span>Lost</span><div class="bar"><i style="width:0%"></i></div><strong>0</strong></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <h2><i class="fa-solid fa-users"></i> Registered Customers</h2>
+          <span id="metricCustomers" class="metric-pill">0 accounts</span>
+        </header>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Joined</th><th>Name</th><th>Email</th><th>Role</th></tr>
+            </thead>
+            <tbody id="customerRows"><tr><td colspan="4" class="empty">Loading customers…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
           <h2><i class="fa-solid fa-chart-pie"></i> Quiz Persona Insights</h2>
           <span id="metricQuiz" class="metric-pill">0 completions</span>
         </header>

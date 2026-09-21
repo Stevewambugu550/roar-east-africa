@@ -470,6 +470,11 @@ router.get('/admin/quiz', requireRoarAdmin, async (_req, res) => {
     res.json({ results: rows });
 });
 
+router.get('/admin/customers', requireRoarAdmin, async (_req, res) => {
+    const { rows } = await pool.query('select id, email, first_name, last_name, role, created_at from public.roar_customers order by created_at desc limit 500');
+    res.json({ customers: rows });
+});
+
 router.get('/promotion', async (_req, res) => {
     const claimed = Number((await pool.query('select count(*)::int n from public.roar_launch_claims')).rows[0].n);
     res.json({ total:5, claimed, remaining:Math.max(0,5-claimed), discountPercent:10 });

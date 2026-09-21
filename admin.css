@@ -424,6 +424,49 @@ select.status-select {
 
 .view-btn:hover { background: rgba(21,29,22,.05); }
 
+/* Status overview bars */
+.status-bars {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+}
+
+.status-bar {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 110px 1fr 45px;
+}
+
+.status-bar span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.status-bar .bar {
+  background: #edf1ec;
+  border-radius: 20px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.status-bar .bar i {
+  background: var(--forest);
+  border-radius: 20px;
+  display: block;
+  height: 100%;
+  transition: width .4s ease;
+}
+
+.status-bar strong {
+  color: var(--ink);
+  font-size: 13px;
+  text-align: right;
+}
+
 /* Offers */
 .offer-cards {
   display: grid;
