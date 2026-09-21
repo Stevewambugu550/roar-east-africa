@@ -122,6 +122,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return matchesStatus && (!query || haystack.includes(query));
         });
 
+        if (!leads.length) {
+            rows.innerHTML = '<tr><td colspan="8" class="empty">No briefs yet.</td></tr>';
+            const existing = document.querySelector('#leadsSection .empty-state');
+            if (!existing) {
+                document.querySelector('#leadsSection').insertAdjacentHTML('afterbegin', `
+                    <div class="empty-state">
+                        <h3>No safari briefs yet</h3>
+                        <p>Your dashboard is connected and ready. Share the website link to start receiving inquiries. When guests submit their safari briefs, they will appear here.</p>
+                    </div>
+                `);
+            }
+            return;
+        }
+        document.querySelector('#leadsSection .empty-state')?.remove();
+
         if (!visible.length) {
             rows.innerHTML = '<tr><td colspan="8" class="empty">No briefs match this view.</td></tr>';
             return;
@@ -153,7 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(id) {
         const lead = leads.find(l => l.id === id);
-        if (!lead) return;
+        if (!lead) {
+            document.getElementById('modalClientName').textContent = 'Lead not found';
+            document.getElementById('modalContent').innerHTML = '<div class="modal-field full"><p>This lead could not be loaded. Try refreshing the dashboard.</p></div>';
+            document.getElementById('leadModal').hidden = false;
+            return;
+        }
         document.getElementById('modalClientName').textContent = lead.client_name;
         const content = document.getElementById('modalContent');
         content.innerHTML = `
