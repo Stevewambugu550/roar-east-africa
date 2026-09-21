@@ -122,37 +122,36 @@ document.addEventListener('DOMContentLoaded', () => {
             return matchesStatus && (!query || haystack.includes(query));
         });
 
+        document.querySelector('#dashboardPanel .empty-state')?.remove();
         if (!leads.length) {
-            rows.innerHTML = '<tr><td colspan="8" class="empty">No briefs yet.</td></tr>';
-            const existing = document.querySelector('#leadsSection .empty-state');
-            if (!existing) {
-                document.querySelector('#leadsSection').insertAdjacentHTML('afterbegin', `
-                    <div class="empty-state">
-                        <h3>No safari briefs yet</h3>
-                        <p>Your dashboard is connected and ready. Share the website link to start receiving inquiries. When guests submit their safari briefs, they will appear here.</p>
-                    </div>
-                `);
-            }
-            return;
+            document.querySelector('.admin-container').insertAdjacentHTML('beforeend', `
+                <div class="empty-state">
+                    <h3>No safari briefs yet</h3>
+                    <p>Your dashboard is connected and ready. Share the website link to start receiving inquiries. When guests submit their safari briefs, they will appear here.</p>
+                </div>
+            `);
         }
-        document.querySelector('#leadsSection .empty-state')?.remove();
 
         if (!visible.length) {
             rows.innerHTML = '<tr><td colspan="8" class="empty">No briefs match this view.</td></tr>';
             return;
         }
+
         rows.innerHTML = visible.map(lead => `<tr data-lead-id="${escapeHtml(lead.id)}">
-            <td>${escapeHtml(new Date(lead.created_at).toLocaleDateString())}<small>${escapeHtml(new Date(lead.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</small></td>
-            <td><strong>${escapeHtml(lead.client_name)}</strong><small>${escapeHtml(lead.client_email)}</small></td>
-            <td>${escapeHtml(lead.primary_objective || 'Custom journey')}<small>${escapeHtml(lead.target_dates || 'Dates flexible')}</small></td>
+            <td>${escapeHtml(new Date(lead.created_at).toLocaleDateString())}<span class="sub">${escapeHtml(new Date(lead.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}))}</span></td>
+            <td><strong>${escapeHtml(lead.client_name)}</strong><span class="sub">${escapeHtml(lead.client_email)}</span></td>
+            <td>${escapeHtml(lead.primary_objective || 'Custom journey')}<span class="sub">${escapeHtml(lead.target_dates || 'Dates flexible')}</span></td>
             <td>${escapeHtml(lead.total_guests)}</td>
             <td>${escapeHtml(lead.tier_preference || '—')}</td>
             <td>${formatMoney(lead.estimated_value)}</td>
-            <td><select data-lead-id="${escapeHtml(lead.id)}">${Object.entries(statusLabels).map(([value,label]) => `<option value="${value}" ${lead.status===value?'selected':''}>${label}</option>`).join('')}</select></td>
-            <td><button class="view-btn" data-lead-id="${escapeHtml(lead.id)}" type="button"><i class="fa-solid fa-eye"></i> View</button></td>
+            <td>${statusBadge(lead.status)}</td>
+            <td>
+                <select class="status-select" data-lead-id="${escapeHtml(lead.id)}">${Object.entries(statusLabels).map(([value,label]) => `<option value="${value}" ${lead.status===value?'selected':''}>${label}</option>`).join('')}</select>
+                <button class="view-btn" data-lead-id="${escapeHtml(lead.id)}" type="button"><i class="fa-solid fa-eye"></i> View</button>
+            </td>
         </tr>`).join('');
 
-        rows.querySelectorAll('select[data-lead-id]').forEach(select => select.addEventListener('change', async () => {
+        rows.querySelectorAll('select.status-select').forEach(select => select.addEventListener('change', async () => {
             select.disabled = true;
             try {
                 const { lead } = await adminApi(`/admin/leads/${encodeURIComponent(select.dataset.leadId)}`, 'PATCH', { status: select.value });
@@ -168,17 +167,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(id) {
         const lead = leads.find(l => l.id === id);
+        const nameEl = document.getElementById('modalClientName');
+        const content = document.getElementById('modalContent');
         if (!lead) {
-            document.getElementById('modalClientName').textContent = 'Lead not found';
-            document.getElementById('modalContent').innerHTML = '<div class="modal-field full"><p>This lead could not be loaded. Try refreshing the dashboard.</p></div>';
+            nameEl.textContent = 'Lead not found';
+            content.innerHTML = '<div class="modal-field full"><p>This lead could not be loaded. Try refreshing the dashboard.</p></div>';
             document.getElementById('leadModal').hidden = false;
             return;
         }
-        document.getElementById('modalClientName').textContent = lead.client_name;
-        const content = document.getElementById('modalContent');
+        nameEl.textContent = lead.client_name;
         content.innerHTML = `
             <div class="modal-field"><label>Email</label><p>${escapeHtml(lead.client_email)}</p></div>
-            <div class="modal-field"><label>Phone / WhatsApp</label><p>${escapeHtml(lead.whatsapp || '—')}</p></div>
             <div class="modal-field"><label>Travel dates</label><p>${escapeHtml(lead.target_dates || '—')}</p></div>
             <div class="modal-field"><label>Guests</label><p>${escapeHtml(lead.total_guests)}</p></div>
             <div class="modal-field"><label>Travel style</label><p>${escapeHtml(lead.tier_preference || '—')}</p></div>
@@ -216,22 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     }
 
-    function showSection(id) {
-        ['leadsSection','quizSection','offersSection'].forEach(s => {
-            document.getElementById(s).hidden = s !== id;
-        });
-        document.querySelectorAll('.admin-nav a').forEach(a => a.classList.toggle('active', a.dataset.section === id.replace('Section','')));
-        if (id === 'offersSection') loadOffers();
-    }
-
     async function showDashboard() {
         loginPanel.hidden = true;
         dashboardPanel.hidden = false;
-        document.querySelector('.admin-sidebar').hidden = false;
         document.getElementById('adminIdentity').textContent = sessionStorage.getItem('roar_admin_email') || 'Authorized admin';
         await loadLeads();
-        loadOffers();
         loadQuiz();
+        loadOffers();
     }
 
     function logout() {
@@ -239,7 +229,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('roar_admin_token');
         sessionStorage.removeItem('roar_admin_email');
         dashboardPanel.hidden = true;
-        document.querySelector('.admin-sidebar').hidden = true;
         loginPanel.hidden = false;
     }
 
@@ -253,19 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('adminLogout').addEventListener('click', logout);
-    document.getElementById('refreshData').addEventListener('click', () => { loadLeads(); loadQuiz(); loadOffers(); });
+    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); });
     document.getElementById('statusFilter').addEventListener('change', renderLeads);
     document.getElementById('leadSearch').addEventListener('input', renderLeads);
     document.getElementById('exportLeads').addEventListener('click', exportCSV);
     document.querySelector('.modal-close').addEventListener('click', closeModal);
     document.querySelector('.modal-backdrop').addEventListener('click', closeModal);
-
-    document.querySelectorAll('.admin-nav a').forEach(link => {
-        link.addEventListener('click', event => {
-            event.preventDefault();
-            showSection(link.dataset.section + 'Section');
-        });
-    });
 
     if (token) showDashboard();
 });

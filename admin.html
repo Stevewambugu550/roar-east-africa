@@ -7,26 +7,13 @@
   <title>Expedition Control Desk | Roar East Africa</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="admin.css?v=4">
+  <link rel="stylesheet" href="admin.css?v=5">
 </head>
 <body>
-  <main class="admin-shell">
-    <aside class="admin-sidebar" hidden>
-      <div class="admin-brand">ROAR <span>CONTROL DESK</span></div>
-      <nav class="admin-nav">
-        <a href="#leads" data-section="leads" class="active"><i class="fa-solid fa-briefcase"></i> Safari Briefs</a>
-        <a href="#quiz" data-section="quiz"><i class="fa-solid fa-chart-pie"></i> Quiz Insights</a>
-        <a href="#offers" data-section="offers"><i class="fa-solid fa-gift"></i> Launch Offers</a>
-      </nav>
-      <div class="sidebar-footer">
-        <small>Signed in as</small>
-        <span id="adminIdentity">Administrator</span>
-        <button id="adminLogout" type="button"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
-      </div>
-    </aside>
 
-    <section id="loginPanel" class="login-panel">
-      <div class="admin-brand">ROAR <span>CONTROL DESK</span></div>
+  <section id="loginPanel" class="login-wrap">
+    <div class="login-card">
+      <div class="brand">ROAR <span>CONTROL DESK</span></div>
       <h1>Administrator Sign In</h1>
       <p>Use your authorized Roar East Africa administrator account.</p>
       <form id="adminLogin">
@@ -36,37 +23,39 @@
         <div id="loginError" class="error" role="alert"></div>
       </form>
       <a href="index.html" class="back-link">← Return to website</a>
-    </section>
+    </div>
+  </section>
 
-    <section id="dashboardPanel" class="dashboard" hidden>
-      <header class="dash-header">
-        <div>
-          <span class="eyebrow">Roar East Africa</span>
-          <h1>Expedition Control Desk</h1>
-        </div>
-        <div class="header-actions">
-          <button id="refreshData" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button>
-        </div>
-      </header>
+  <div id="dashboardPanel" hidden>
+    <nav class="topbar">
+      <div class="topbar-brand">ROAR EAST AFRICA <span>Control Desk</span></div>
+      <div class="topbar-actions">
+        <span id="adminIdentity">Administrator</span>
+        <button id="refreshData" type="button" class="btn-outline"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <button id="adminLogout" type="button" class="btn-primary"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
+      </div>
+    </nav>
 
+    <main class="admin-container">
       <div class="metrics-row">
-        <article><i class="fa-solid fa-envelope-open-text"></i><div><small>Total briefs</small><strong id="metricLeads">0</strong></div></article>
-        <article><i class="fa-solid fa-users"></i><div><small>Travelers</small><strong id="metricGuests">0</strong></div></article>
-        <article><i class="fa-solid fa-sack-dollar"></i><div><small>Estimated pipeline</small><strong id="metricRevenue">$0</strong></div></article>
-        <article><i class="fa-solid fa-fire"></i><div><small>New leads</small><strong id="metricNew">0</strong></div></article>
+        <article class="metric-card metric-primary"><i class="fa-solid fa-envelope-open-text"></i><div><small>Total Briefs</small><strong id="metricLeads">0</strong></div></article>
+        <article class="metric-card metric-success"><i class="fa-solid fa-users"></i><div><small>Total Travelers</small><strong id="metricGuests">0</strong></div></article>
+        <article class="metric-card metric-gold"><i class="fa-solid fa-sack-dollar"></i><div><small>Estimated Pipeline</small><strong id="metricRevenue">$0</strong></div></article>
+        <article class="metric-card metric-warn"><i class="fa-solid fa-fire"></i><div><small>New Leads</small><strong id="metricNew">0</strong></div></article>
       </div>
 
-      <div id="leadsSection" class="admin-section">
-        <div class="section-toolbar">
+      <div id="dashboardError" class="error" role="alert"></div>
+
+      <section class="card">
+        <header class="card-header">
           <h2><i class="fa-solid fa-briefcase"></i> Safari Briefs</h2>
           <div class="toolbar">
             <label>Filter status<select id="statusFilter"><option value="all">All leads</option><option value="new">New</option><option value="reviewing">Reviewing</option><option value="contacted">Contacted</option><option value="proposal_sent">Proposal sent</option><option value="won">Won</option><option value="lost">Lost</option></select></label>
             <label>Search<input id="leadSearch" type="search" placeholder="Name, email, objective…"></label>
-            <button id="exportLeads" type="button" class="btn-secondary"><i class="fa-solid fa-download"></i> Export CSV</button>
+            <button id="exportLeads" type="button" class="btn-outline"><i class="fa-solid fa-download"></i> Export CSV</button>
           </div>
-        </div>
-        <div id="dashboardError" class="error" role="alert"></div>
-        <div class="lead-table-box">
+        </header>
+        <div class="table-wrap">
           <table>
             <thead>
               <tr>
@@ -83,14 +72,14 @@
             <tbody id="leadRows"><tr><td colspan="8" class="empty">Loading briefs…</td></tr></tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div id="quizSection" class="admin-section" hidden>
-        <div class="section-toolbar">
+      <section class="card">
+        <header class="card-header">
           <h2><i class="fa-solid fa-chart-pie"></i> Quiz Persona Insights</h2>
           <span id="metricQuiz" class="metric-pill">0 completions</span>
-        </div>
-        <div class="lead-table-box">
+        </header>
+        <div class="table-wrap">
           <table>
             <thead>
               <tr><th>Date</th><th>Persona</th><th>Transit</th><th>Lodging</th><th>Finale</th><th>Travelers</th><th>Season</th><th>Matched Offer</th></tr>
@@ -98,28 +87,26 @@
             <tbody id="quizRows"><tr><td colspan="8" class="empty">Loading quiz data…</td></tr></tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <div id="offersSection" class="admin-section" hidden>
-        <div class="section-toolbar">
+      <section class="card">
+        <header class="card-header">
           <h2><i class="fa-solid fa-gift"></i> Founding Client Launch Offer</h2>
-        </div>
+        </header>
         <div class="offer-cards">
-          <article class="offer-card"><small>Total places</small><strong id="offerTotal">5</strong></article>
+          <article class="offer-card"><small>Total Places</small><strong id="offerTotal">5</strong></article>
           <article class="offer-card claimed"><small>Claimed</small><strong id="offerClaimed">0</strong></article>
           <article class="offer-card remaining"><small>Remaining</small><strong id="offerRemaining">5</strong></article>
         </div>
-        <div class="lead-table-box" style="margin-top:25px">
+        <div class="table-wrap">
           <table>
-            <thead>
-              <tr><th>Claimed on</th><th>Client</th><th>Email</th><th>Lead value</th></tr>
-            </thead>
+            <thead><tr><th>Claimed On</th><th>Client</th><th>Email</th><th>Lead Value</th></tr></thead>
             <tbody id="claimRows"><tr><td colspan="4" class="empty">Loading claims…</td></tr></tbody>
           </table>
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   <div id="leadModal" class="modal" hidden>
     <div class="modal-backdrop"></div>
@@ -130,7 +117,7 @@
     </div>
   </div>
 
-  <script src="site-config.js?v=4"></script>
-  <script src="admin.js?v=4"></script>
+  <script src="site-config.js?v=5"></script>
+  <script src="admin.js?v=5"></script>
 </body>
 </html>
