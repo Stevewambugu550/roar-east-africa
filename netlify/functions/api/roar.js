@@ -12,7 +12,7 @@ function createJsonPool() {
     const dbPath = path.join(__dirname, 'roar-local-db.json');
     function load() {
         try { return JSON.parse(fs.readFileSync(dbPath, 'utf8')); }
-        catch { return { customers: [], leads: [], claims: [], quiz: [], reviews: [] }; }
+        catch { return { customers: [], leads: [], claims: [], quiz: [], reviews: [], subscribers: [] }; }
     }
     function save(data) { fs.writeFileSync(dbPath, JSON.stringify(data, null, 2)); }
     const now = () => new Date().toISOString();
@@ -26,6 +26,7 @@ function createJsonPool() {
         if (!data.claims) data.claims = [];
         if (!data.quiz) { data.quiz = []; save(data); }
         if (!data.reviews) { data.reviews = []; save(data); }
+        if (!data.subscribers) { data.subscribers = []; save(data); }
 
         if (s.startsWith('create table') || s.startsWith('create index') || s.startsWith('alter table')) {
             return Promise.resolve({ rows: [] });
@@ -234,6 +235,22 @@ function createJsonPool() {
             save(data);
             return Promise.resolve({ rows: found ? [{ id: params[0] }] : [] });
         }
+        if (s.startsWith('insert into public.roar_subscribers')) {
+            if (data.subscribers.some(x => x.email === params[0])) {
+                return Promise.resolve({ rows: [] }); // on conflict do nothing
+            }
+            const subscriber = { id: uuid(), email: params[0], created_at: now() };
+            data.subscribers.push(subscriber);
+            save(data);
+            return Promise.resolve({ rows: [pick(subscriber)] });
+        }
+        if (s.startsWith('select') && s.includes('from public.roar_subscribers')) {
+            let rows = [...data.subscribers];
+            if (s.includes('order by created_at desc')) rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const lim = s.match(/limit (\d+)/);
+            if (lim) rows = rows.slice(0, Number(lim[1]));
+            return Promise.resolve({ rows: rows.map(pick) });
+        }
         return Promise.resolve({ rows: [] });
     }
 
@@ -355,6 +372,11 @@ async function init() {
             created_at timestamptz not null default now()
         );
         create index if not exists roar_reviews_status_idx on public.roar_reviews(status);
+        create table if not exists public.roar_subscribers (
+            id uuid primary key default gen_random_uuid(),
+            email text not null unique check (char_length(email) between 3 and 254),
+            created_at timestamptz not null default now()
+        );
     `);
 }
 
@@ -667,6 +689,25 @@ router.delete('/admin/reviews/:id', requireRoarAdmin, async (req, res) => {
     const { rows } = await pool.query('delete from public.roar_reviews where id=$1 returning id', [req.params.id]);
     if (!rows.length) return res.status(404).json({ message: 'Review not found.' });
     res.json({ success: true });
+});
+
+const subscribeLimit = rateLimit(60 * 60 * 1000, 10);
+
+router.post('/subscribe', subscribeLimit, async (req, res) => {
+    const email = clean(req.body.email, 254).toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+        return res.status(400).json({ message: 'Please enter a valid email address.' });
+    }
+    const { rows } = await pool.query(`
+        insert into public.roar_subscribers (email) values ($1)
+        on conflict (email) do nothing returning id
+    `, [email]);
+    res.status(rows.length ? 201 : 200).json({ success: true, message: 'You are on the list — safari deals and ideas coming your way.' });
+});
+
+router.get('/admin/subscribers', requireRoarAdmin, async (_req, res) => {
+    const { rows } = await pool.query('select * from public.roar_subscribers order by created_at desc limit 500');
+    res.json({ subscribers: rows });
 });
 
 router.get('/promotion', async (_req, res) => {

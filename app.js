@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const discountAmount = Math.round(rawGroupTotal * (offerPercent / 100));
         const groupTotal = rawGroupTotal - discountAmount;
         const perPerson = totalGuests > 0 ? Math.round(groupTotal / totalGuests) : rawPerPerson;
-        const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-        perPersonDisplay.textContent = currency.format(perPerson);
-        totalGroupDisplay.textContent = currency.format(groupTotal);
+        const fmt = window.formatRoarPrice || (usd => `$${usd.toLocaleString()}`);
+        perPersonDisplay.textContent = fmt(perPerson);
+        totalGroupDisplay.textContent = fmt(groupTotal);
         currentEstimate = {
             packageName,
             guests: totalGuests,
@@ -164,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     toggleCustomFields();
     calculateSafariRates();
+    window.addEventListener('roar:currencychange', calculateSafariRates);
 
     document.getElementById('useEstimateBtn')?.addEventListener('click', () => {
         if (!currentEstimate) return;
@@ -171,8 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const guests = document.getElementById('guestCount');
         if (guests) guests.value = currentEstimate.guests;
         if (notes) {
-            let estimate = `Planning estimate: ${currentEstimate.packageName}; ${currentEstimate.season}; ${currentEstimate.addon}; ${currentEstimate.offer}; $${currentEstimate.perPerson.toLocaleString()} per person / $${currentEstimate.groupTotal.toLocaleString()} group total.`;
-            if (currentEstimate.discountAmount) estimate += ` (Includes $${currentEstimate.discountAmount.toLocaleString()} estimated discount).`;
+            const fmt = window.formatRoarPrice || (usd => `$${usd.toLocaleString()}`);
+            let estimate = `Planning estimate: ${currentEstimate.packageName}; ${currentEstimate.season}; ${currentEstimate.addon}; ${currentEstimate.offer}; ${fmt(currentEstimate.perPerson)} per person / ${fmt(currentEstimate.groupTotal)} group total.`;
+            if (currentEstimate.discountAmount) estimate += ` (Includes ${fmt(currentEstimate.discountAmount)} estimated discount).`;
             notes.value = notes.value ? `${notes.value}\n${estimate}` : estimate;
         }
     });
@@ -501,7 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateCircuitBuilder() {
         const summary = document.getElementById('circuitSummaryTotal');
         const total = selectedCircuitDestinations.length * costPerDestinationBlock;
-        if (summary) summary.textContent = total > 0 ? `$${total.toLocaleString()}` : '$0';
+        const fmt = window.formatRoarPrice || (usd => `$${usd.toLocaleString()}`);
+        if (summary) summary.textContent = total > 0 ? fmt(total) : fmt(0);
 
         const notes = document.getElementById('clientNotes');
         if (notes && selectedCircuitDestinations.length > 0) {
@@ -521,4 +524,31 @@ document.addEventListener('DOMContentLoaded', () => {
             updateCircuitBuilder();
         });
     });
+    window.addEventListener('roar:currencychange', updateCircuitBuilder);
+
+    // Footer newsletter subscription
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        const newsletterMsg = document.getElementById('newsletterMsg');
+        newsletterForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            newsletterMsg.textContent = '';
+            const email = document.getElementById('newsletterEmail').value.trim();
+            try {
+                const res = await fetch(`${window.ROAR_CONFIG.apiBase}/subscribe`, {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Unable to subscribe.');
+                newsletterForm.reset();
+                newsletterMsg.textContent = data.message || 'Subscribed — welcome aboard.';
+                newsletterMsg.className = 'ok';
+            } catch (error) {
+                newsletterMsg.textContent = error.message;
+                newsletterMsg.className = 'err';
+            }
+        });
+    }
 });

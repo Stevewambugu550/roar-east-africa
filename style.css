@@ -413,3 +413,214 @@
     .review-form-row { grid-template-columns: 1fr; }
     .guest-card { padding: 28px; }
 }
+
+/* Currency toggle */
+.currency-toggle {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 30px;
+    display: flex;
+    margin-right: 16px;
+    padding: 3px;
+}
+.currency-toggle button {
+    background: transparent;
+    border: 0;
+    border-radius: 30px;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    font: 700 9.5px var(--sans);
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    transition: 0.2s;
+}
+.currency-toggle button.active {
+    background: var(--gold);
+    color: var(--forest);
+}
+
+/* Why travel with Roar — promise stats */
+.promise-section {
+    background: var(--forest);
+    padding: 80px 6%;
+    text-align: center;
+}
+.promise-head {
+    margin: 0 auto 45px;
+    max-width: 700px;
+}
+.promise-head .sub {
+    color: var(--gold);
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+.promise-head h2 {
+    color: #fff;
+    font: 500 40px var(--serif);
+    margin-bottom: 14px;
+}
+.promise-head p {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.7;
+}
+.promise-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    margin: 0 auto;
+    max-width: 1200px;
+}
+.promise-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.14);
+    padding: 30px 18px;
+}
+.promise-card i {
+    color: var(--gold);
+    display: block;
+    font-size: 20px;
+    margin-bottom: 14px;
+}
+.promise-card strong {
+    color: #fff;
+    display: block;
+    font: 600 30px var(--serif);
+    margin-bottom: 8px;
+}
+.promise-card span {
+    color: rgba(255, 255, 255, 0.55);
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 0.8px;
+    line-height: 1.55;
+    text-transform: uppercase;
+}
+
+/* How booking works */
+.how-section {
+    background: #fff;
+    padding: 90px 6%;
+}
+.how-grid {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    margin: 0 auto;
+    max-width: 1150px;
+}
+.how-step {
+    background: var(--cream);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 34px 28px;
+    position: relative;
+}
+.how-num {
+    color: rgba(212, 175, 55, 0.35);
+    font: 600 44px var(--serif);
+    position: absolute;
+    right: 22px;
+    top: 18px;
+}
+.how-step i {
+    color: var(--clay);
+    display: block;
+    font-size: 22px;
+    margin-bottom: 16px;
+}
+.how-step h3 {
+    font: 600 21px var(--serif);
+    margin-bottom: 10px;
+}
+.how-step p {
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.65;
+}
+
+/* Footer socials + newsletter */
+.footer-social {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+.footer-social a {
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.75);
+    display: flex;
+    font-size: 13px;
+    height: 36px;
+    justify-content: center;
+    text-decoration: none;
+    transition: 0.2s;
+    width: 36px;
+}
+.footer-social a:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--forest);
+}
+.newsletter-form {
+    margin-top: 16px;
+}
+.newsletter-form label {
+    color: rgba(255, 255, 255, 0.55);
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.newsletter-row {
+    display: flex;
+}
+.newsletter-row input {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    flex: 1;
+    font: 400 12px var(--sans);
+    min-width: 0;
+    outline: none;
+    padding: 11px 12px;
+}
+.newsletter-row input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+.newsletter-row input:focus {
+    border-color: var(--gold);
+}
+.newsletter-row button {
+    background: var(--gold);
+    border: 0;
+    color: var(--forest);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 16px;
+}
+#newsletterMsg {
+    display: block;
+    font-size: 10.5px;
+    margin-top: 8px;
+}
+#newsletterMsg.ok { color: #8fd0a5; }
+#newsletterMsg.err { color: #e08a80; }
+
+@media (max-width: 900px) {
+    .promise-head h2 { font-size: 32px; }
+    .currency-toggle { margin-right: 10px; }
+}
+@media (max-width: 620px) {
+    .currency-toggle { display: none; }
+    .promise-section { padding: 60px 5%; }
+    .how-section { padding: 60px 5%; }
+}

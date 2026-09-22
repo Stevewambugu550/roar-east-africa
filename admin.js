@@ -166,6 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function loadSubscribers() {
+        const subRows = document.getElementById('subscriberRows');
+        try {
+            const data = await adminApi('/admin/subscribers');
+            const subs = data.subscribers || [];
+            document.getElementById('metricSubscribers').textContent = `${subs.length} subscriber${subs.length === 1 ? '' : 's'}`;
+            if (!subs.length) {
+                subRows.innerHTML = '<tr><td colspan="2" class="empty">No newsletter subscribers yet.</td></tr>';
+                return;
+            }
+            subRows.innerHTML = subs.slice(0, 200).map(s => `<tr>
+                <td>${escapeHtml(new Date(s.created_at).toLocaleDateString())}</td>
+                <td>${escapeHtml(s.email)}</td>
+            </tr>`).join('');
+        } catch (error) {
+            subRows.innerHTML = '<tr><td colspan="2" class="empty">Subscriber data unavailable.</td></tr>';
+        }
+    }
+
     function updateStatusBars() {
         const counts = { new:0, reviewing:0, contacted:0, proposal_sent:0, won:0, lost:0 };
         leads.forEach(l => { counts[l.status || 'new']++; });
@@ -402,6 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadOffers();
         loadCustomers();
         loadReviews();
+        loadSubscribers();
     }
 
     function logout() {
@@ -422,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('adminLogout').addEventListener('click', logout);
-    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); loadCustomers(); loadReviews(); });
+    document.getElementById('refreshData').addEventListener('click', () => { loadLeads().then(loadOffers); loadQuiz(); loadCustomers(); loadReviews(); loadSubscribers(); });
     document.getElementById('statusFilter').addEventListener('change', renderLeads);
     document.getElementById('leadSearch').addEventListener('input', renderLeads);
     document.getElementById('exportLeads').addEventListener('click', exportCSV);
