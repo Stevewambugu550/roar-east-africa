@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Your Safari | Roar East Africa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css?v=7">
+</head>
+<body class="booking-page">
+
+  <nav class="booking-nav" aria-label="Booking navigation">
+    <a href="index.html" class="logo">ROAR <span>EAST AFRICA</span></a>
+    <div class="booking-nav-right">
+      <div class="currency-toggle" role="group" aria-label="Display currency"><button type="button" data-cur="usd" class="active">USD</button><button type="button" data-cur="kes">KSh</button></div>
+      <a href="index.html" class="booking-back"><i class="fa-solid fa-arrow-left"></i> Back to site</a>
+    </div>
+  </nav>
+
+  <header class="booking-hero">
+    <span class="sub">Private Booking Request</span>
+    <h1>Reserve your East African journey.</h1>
+    <p>Pick a trip, tell us who's travelling and how to reach you — a Kenya-based safari designer replies within 24 hours with a confirmed written quote.</p>
+  </header>
+
+  <main class="booking-layout">
+
+    <section class="booking-trips" aria-label="Choose your trip">
+      <div class="booking-step-head"><span class="bk-step">Step 1</span><h2>Choose your journey</h2></div>
+      <div class="booking-trip-grid" id="tripGrid"></div>
+    </section>
+
+    <aside class="booking-panel" aria-label="Booking details">
+      <div class="booking-step-head"><span class="bk-step">Step 2</span><h2>Your details</h2></div>
+      <form id="bookingForm" novalidate>
+        <div class="bk-summary" id="bookingSummary"><i class="fa-solid fa-route"></i> Select a trip to see your estimate.</div>
+
+        <label class="bk-label">Package duration<select id="bkOption" required></select></label>
+
+        <div class="bk-row">
+          <label class="bk-label">Start date<input type="date" id="bkStart"></label>
+          <label class="bk-label">End date<input type="date" id="bkEnd"></label>
+        </div>
+        <label class="dates-flexible booking-flex"><input type="checkbox" id="bkFlexible"> <span>My dates are flexible</span></label>
+
+        <div class="bk-row">
+          <label class="bk-label">Adults<input type="number" id="bkAdults" min="1" max="30" value="2" required></label>
+          <label class="bk-label">Children (0–11)<input type="number" id="bkChildren" min="0" max="20" value="0"></label>
+        </div>
+
+        <label class="bk-label">Full name<input id="bkName" required autocomplete="name" placeholder="Your full name"></label>
+        <label class="bk-label">Email<input id="bkEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+        <label class="bk-label">Phone / WhatsApp<input id="bkPhone" type="tel" required autocomplete="tel" placeholder="+254 7XX XXX XXX"></label>
+        <label class="bk-label">Country of residence<input id="bkCountry" autocomplete="country-name" placeholder="Kenya"></label>
+        <label class="bk-label">Special requests<textarea id="bkNotes" rows="3" placeholder="Anniversary, dietary needs, mobility notes, budget range…"></textarea></label>
+
+        <label class="bk-check"><input type="checkbox" id="bkTerms" required> <span>I agree to the <a href="terms.html" target="_blank" rel="noopener">booking terms</a>. This request is not a confirmed reservation until quoted in writing.</span></label>
+        <label class="bk-check"><input type="checkbox" id="bkMarketing"> <span>Optional: send me occasional safari deals and planning tips.</span></label>
+
+        <button class="btn-submit" type="submit">Request This Booking <i class="fa-solid fa-arrow-right"></i></button>
+        <div id="bookingMsg" role="status"></div>
+      </form>
+    </aside>
+
+  </main>
+
+  <footer class="booking-foot">
+    <p>Prefer to talk first? <a href="https://wa.me/13174463498" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp +1 317 446 3498</a> · <a href="mailto:info@roareastafrica.com">info@roareastafrica.com</a> · Nairobi, Kenya</p>
+  </footer>
+
+  <script src="site-config.js?v=7"></script>
+  <script src="currency.js?v=7"></script>
+  <script src="account-system.js?v=7"></script>
+  <script src="booking.js?v=7"></script>
+</body>
+</html>

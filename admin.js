@@ -316,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('editLeadId').value = lead.id;
         document.getElementById('editClientName').value = lead.client_name || '';
         document.getElementById('editClientEmail').value = lead.client_email || '';
+        document.getElementById('editClientPhone').value = lead.client_phone || '';
         document.getElementById('editTargetDates').value = lead.target_dates || '';
         document.getElementById('editTotalGuests').value = lead.total_guests || '';
         document.getElementById('editTierPreference').value = lead.tier_preference || '';
@@ -344,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             client_name: document.getElementById('editClientName').value.trim(),
             client_email: document.getElementById('editClientEmail').value.trim(),
+            client_phone: document.getElementById('editClientPhone').value.trim(),
             target_dates: document.getElementById('editTargetDates').value.trim(),
             total_guests: Number(document.getElementById('editTotalGuests').value),
             tier_preference: document.getElementById('editTierPreference').value.trim(),
@@ -375,6 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nameEl.textContent = lead.client_name;
         content.innerHTML = `
             <div class="modal-field"><label>Email</label><p>${escapeHtml(lead.client_email)}</p></div>
+            <div class="modal-field"><label>Phone / WhatsApp</label><p>${escapeHtml(lead.client_phone || '—')}</p></div>
             <div class="modal-field"><label>Travel dates</label><p>${escapeHtml(lead.target_dates || '—')}</p></div>
             <div class="modal-field"><label>Guests</label><p>${escapeHtml(lead.total_guests)}</p></div>
             <div class="modal-field"><label>Travel style</label><p>${escapeHtml(lead.tier_preference || '—')}</p></div>

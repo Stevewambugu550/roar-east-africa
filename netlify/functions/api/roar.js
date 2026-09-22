@@ -129,6 +129,7 @@ function createJsonPool() {
                 terms_accepted: true,
                 marketing_consent: params[8],
                 estimated_value: params[9],
+                client_phone: params[10],
                 source: 'website',
                 status: 'new',
                 launch_offer_claimed: false,
@@ -155,7 +156,7 @@ function createJsonPool() {
             };
             if (s.includes('set status=')) lead.status = getParam('status');
             if (s.includes('launch_offer_claimed=true')) { lead.launch_offer_claimed = true; lead.launch_offer_percent = 10; }
-            const editable = ['client_name','client_email','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
+            const editable = ['client_name','client_email','client_phone','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
             editable.forEach(f => { const v = getParam(f); if (v !== undefined) lead[f] = v; });
             lead.updated_at = now();
             save(data);
@@ -337,6 +338,7 @@ async function init() {
             updated_at timestamptz not null default now()
         );
         alter table public.roar_leads add column if not exists customer_id uuid references public.roar_customers(id) on delete set null;
+        alter table public.roar_leads add column if not exists client_phone text check (char_length(client_phone) <= 40);
         alter table public.roar_leads add column if not exists launch_offer_claimed boolean not null default false;
         alter table public.roar_leads add column if not exists launch_offer_percent integer;
         create table if not exists public.roar_launch_claims (
@@ -496,12 +498,13 @@ router.post('/leads', leadLimit, requireCustomer, async (req, res) => {
     const clientEmail = customerResult.rows[0].email;
     const { rows } = await pool.query(`
         insert into public.roar_leads
-            (customer_id,client_name,client_email,target_dates,total_guests,tier_preference,primary_objective,notes,terms_accepted,marketing_consent,estimated_value,source)
-        values ($1,$2,$3,$4,$5,$6,$7,$8,true,$9,$10,'website') returning *
+            (customer_id,client_name,client_email,target_dates,total_guests,tier_preference,primary_objective,notes,terms_accepted,marketing_consent,estimated_value,client_phone,source)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,true,$9,$10,$11,'website') returning *
     `, [req.roarUser.id, clientName, clientEmail, clean(req.body.targetDates,200)||null, totalGuests,
         clean(req.body.tierPreference,150)||null, clean(req.body.primaryObjective,200)||null,
         clean(req.body.notes,3000)||null, req.body.marketingConsent===true,
-        Number.isFinite(Number(req.body.estimatedValue)) ? Number(req.body.estimatedValue) : null]);
+        Number.isFinite(Number(req.body.estimatedValue)) ? Number(req.body.estimatedValue) : null,
+        clean(req.body.clientPhone,40)||null]);
     res.status(201).json({ success:true, lead:rows[0] });
 });
 
@@ -537,7 +540,7 @@ router.patch('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
 });
 
 router.put('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
-    const allowed = ['client_name','client_email','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
+    const allowed = ['client_name','client_email','client_phone','target_dates','total_guests','tier_preference','primary_objective','notes','estimated_value','status'];
     const fields = [];
     const values = [];
     let index = 0;
