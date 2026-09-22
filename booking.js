@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
           options: [{ label: '2 Days / 1 Night', kes: 14800 }, { label: '3 Days / 2 Nights', kes: 21500 }] },
         { id: 'tsavo-weekend', name: 'Tsavo East Red Elephants Weekend', cat: 'Weekend Escape', img: 'images/safari-vehicle.webp',
           options: [{ label: '2 Days / 1 Night', kes: 18900 }, { label: '3 Days / 2 Nights', kes: 27500 }] },
+        { id: 'travel-services', name: 'Travel Services Only', cat: 'Transfers · Hotels · Tickets', img: null,
+          options: [{ label: 'Airport transfer, hotel/BnB, tickets or day trip — quoted individually', custom: true }] },
         { id: 'custom', name: 'Custom / Not sure yet', cat: 'Tailor-Made', img: null,
           options: [{ label: 'Custom itinerary — priced on request', custom: true }] },
     ];
@@ -174,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
         const country = document.getElementById('bkCountry').value.trim();
         if (country) noteLines.push(`Country of residence: ${country}`);
+        const addons = [...document.querySelectorAll('.bk-addons input:checked')].map(c => c.value);
+        if (addons.length) noteLines.push(`Add-on services: ${addons.join(', ')}`);
         const requests = document.getElementById('bkNotes').value.trim();
         if (requests) noteLines.push(`Special requests: ${requests}`);
 
