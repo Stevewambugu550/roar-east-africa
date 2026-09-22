@@ -526,6 +526,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.addEventListener('roar:currencychange', updateCircuitBuilder);
 
+    // Deals listing category filter
+    document.querySelectorAll('.deals-filter button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.deals-filter button').forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            document.querySelectorAll('.deal-card').forEach((card) => {
+                card.style.display = (filter === 'all' || card.dataset.cat === filter) ? '' : 'none';
+            });
+        });
+    });
+
     // Footer newsletter subscription
     const newsletterForm = document.getElementById('newsletterForm');
     if (newsletterForm) {

@@ -624,3 +624,169 @@
     .promise-section { padding: 60px 5%; }
     .how-section { padding: 60px 5%; }
 }
+
+/* Safari & Beach Deals listing */
+.deals-section {
+    background: var(--cream);
+    padding: 95px 6%;
+}
+.deals-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 0 auto 40px;
+}
+.deals-filter button {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 30px;
+    color: var(--muted);
+    cursor: pointer;
+    font: 600 11px var(--sans);
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+.deals-filter button:hover { border-color: var(--gold); color: var(--forest); }
+.deals-filter button.active {
+    background: var(--forest);
+    border-color: var(--forest);
+    color: var(--gold);
+}
+.deals-grid {
+    display: grid;
+    gap: 26px;
+    grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+    margin: 0 auto;
+    max-width: 1250px;
+}
+.deal-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 24px rgba(21, 29, 22, 0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.deal-card:hover {
+    box-shadow: 0 16px 40px rgba(21, 29, 22, 0.12);
+    transform: translateY(-5px);
+}
+.deal-img {
+    background-position: center;
+    background-size: cover;
+    height: 180px;
+    position: relative;
+}
+.deal-tag {
+    background: var(--gold);
+    color: var(--forest);
+    font-size: 8.5px;
+    font-weight: 800;
+    left: 14px;
+    letter-spacing: 1.4px;
+    padding: 6px 11px;
+    position: absolute;
+    text-transform: uppercase;
+    top: 14px;
+}
+.deal-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 22px;
+}
+.deal-body h3 {
+    font: 600 21px var(--serif);
+    line-height: 1.15;
+    margin-bottom: 6px;
+}
+.deal-sub {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
+}
+.deal-options {
+    border-top: 1px dashed #e4ddcf;
+    margin-bottom: 14px;
+}
+.deal-option {
+    align-items: baseline;
+    border-bottom: 1px dashed #e4ddcf;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 9px 0;
+}
+.deal-option span {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.deal-option strong {
+    color: var(--forest);
+    font-size: 15px;
+    font-weight: 700;
+    margin-left: auto;
+}
+.deal-option em {
+    color: var(--clay);
+    font-size: 9px;
+    font-style: normal;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.deal-valid {
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 0.4px;
+    margin-bottom: 16px;
+}
+.deal-valid i { color: var(--gold); margin-right: 6px; }
+.deal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+.deal-btn {
+    align-items: center;
+    display: inline-flex;
+    flex: 1;
+    font-size: 10px;
+    font-weight: 700;
+    gap: 7px;
+    justify-content: center;
+    letter-spacing: 1.2px;
+    padding: 12px 10px;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+.deal-btn-wa {
+    background: var(--forest);
+    color: #fff;
+}
+.deal-btn-wa i { color: #25d366; font-size: 13px; }
+.deal-btn-wa:hover { background: #1f2c20; }
+.deal-btn-outline {
+    border: 1px solid var(--forest);
+    color: var(--forest);
+}
+.deal-btn-outline:hover { background: var(--forest); color: #fff; }
+.deal-note {
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.65;
+    margin: 40px auto 0;
+    max-width: 760px;
+    text-align: center;
+}
+@media (max-width: 620px) {
+    .deals-section { padding: 70px 5%; }
+    .deals-grid { grid-template-columns: 1fr; }
+}

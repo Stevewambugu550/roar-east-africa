@@ -25,6 +25,13 @@
                 ? orig.replace(/\$\d[\d,]*(?:\s*USD)?/g, m => window.formatRoarPrice(Number(m.replace(/[^\d]/g, ''))))
                 : orig;
         });
+        document.querySelectorAll('[data-convert-kes]').forEach(el => {
+            if (!el.dataset.origText) el.dataset.origText = el.textContent;
+            const orig = el.dataset.origText;
+            el.textContent = kes
+                ? orig
+                : orig.replace(/KSh\s*[\d,]+/g, m => '$' + Math.round(Number(m.replace(/[^\d]/g, '')) / RATE_KES_PER_USD).toLocaleString('en-US'));
+        });
     }
 
     function updateToggleButtons() {
