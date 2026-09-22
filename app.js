@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const account = window.roarAccount;
     const accountAction = document.getElementById('accountAction');
     if (account?.isAuthenticated()) {
-        accountAction.innerHTML = `<span>Hi, ${account.user.firstName}</span><button type="button">Sign Out</button>`;
+        const isAdmin = account.user?.role === 'admin';
+        const safeName = String(account.user.firstName || 'there').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        accountAction.innerHTML = `<span>Hi, ${safeName}</span>${isAdmin ? '<a href="admin.html" style="color:var(--gold);font-weight:700">Control Desk</a>' : ''}<button type="button">Sign Out</button>`;
         accountAction.querySelector('button').addEventListener('click', () => account.logout());
         const name = document.getElementById('clientName');
         const email = document.getElementById('clientEmail');

@@ -46,9 +46,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 password: document.getElementById('regPassword').value,
             }, button);
             window.roarAccount.save(data.token, data.user);
-            showMessage('Account created. Redirecting…', 'success');
+            const isAdmin = data.user?.role === 'admin';
+            if (isAdmin) {
+                sessionStorage.setItem('roar_admin_token', data.token);
+                sessionStorage.setItem('roar_admin_email', data.user.email || '');
+            }
+            showMessage(isAdmin ? 'Account created. Opening the Control Desk…' : 'Account created. Redirecting…', 'success');
             const destination = params.get('return');
             setTimeout(() => {
+                if (isAdmin && !destination) { window.location.href = 'admin.html'; return; }
                 window.location.href = destination && destination.startsWith(location.origin) ? destination : 'index.html';
             }, 500);
         } catch (error) {
@@ -66,9 +72,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 password: document.getElementById('loginPassword').value,
             }, button);
             window.roarAccount.save(data.token, data.user);
-            showMessage('Signed in. Redirecting…', 'success');
+            const isAdmin = data.user?.role === 'admin';
+            if (isAdmin) {
+                sessionStorage.setItem('roar_admin_token', data.token);
+                sessionStorage.setItem('roar_admin_email', data.user.email || '');
+            }
+            showMessage(isAdmin ? 'Signed in. Opening the Control Desk…' : 'Signed in. Redirecting…', 'success');
             const destination = params.get('return');
             setTimeout(() => {
+                if (isAdmin && !destination) { window.location.href = 'admin.html'; return; }
                 window.location.href = destination && destination.startsWith(location.origin) ? destination : 'index.html';
             }, 500);
         } catch (error) {
