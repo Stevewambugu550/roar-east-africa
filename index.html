@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <nav class="navbar" aria-label="Main navigation">
@@ -505,7 +505,8 @@
           <form id="safariLeadForm">
             <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
             <div class="form-row"><div class="input-wrap"><label for="clientName">Your name</label><input id="clientName" name="name" required autocomplete="name" placeholder="Dr. Elizabeth Sterling"></div><div class="input-wrap"><label for="clientEmail">Email address</label><input id="clientEmail" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div></div>
-            <div class="form-row"><div class="input-wrap"><label for="travelDates">Travel dates</label><input id="travelDates" name="dates" placeholder="August 10–20, 2026"></div><div class="input-wrap"><label for="guestCount">Travelers</label><input id="guestCount" name="guests" type="number" min="1" max="30" value="2"></div></div>
+            <div class="form-row"><div class="input-wrap"><label for="travelStart">Start date</label><input id="travelStart" name="start" type="date"></div><div class="input-wrap"><label for="travelEnd">End date</label><input id="travelEnd" name="end" type="date"></div></div>
+            <div class="form-row"><div class="input-wrap"><label for="guestCount">Travelers</label><input id="guestCount" name="guests" type="number" min="1" max="30" value="2"></div><label class="dates-flexible"><input type="checkbox" id="datesFlexible"> <span>My dates are flexible</span></label></div>
             <div class="input-wrap"><label for="luxuryTier">Your travel style</label><select id="luxuryTier" name="tier"><option value="Ultra-Luxury Private Camps & Villas">Ultra-Luxury Private Camps &amp; Villas</option><option value="Premium Boutique Tented Lodges" selected>Premium Boutique Tented Lodges</option><option value="Classic Comfortable Camps">Classic Comfortable Camps</option><option value="Mobile Tented Expedition (fly-camp style)">Mobile Tented Expedition (fly-camp style)</option><option value="Lodge & Beach Combination">Lodge &amp; Beach Combination</option><option value="Conservation & Community-Centric">Conservation &amp; Community-Centric</option><option value="Photography / Filmmaker Setup">Photography / Filmmaker Setup</option><option value="Family-Friendly with Childcare">Family-Friendly with Childcare</option><option value="Honeymoon / Celebration">Honeymoon / Celebration</option><option value="Adventure Active (walking, riding, boating)">Adventure Active (walking, riding, boating)</option><option value="Other (describe in notes)">Other (describe in notes)</option></select></div><div class="input-wrap" id="luxuryTierOtherWrap" hidden><label for="luxuryTierOther">Describe your preferred travel style</label><input id="luxuryTierOther" type="text" placeholder="e.g. vintage safari mobile camp with private chef"></div>
             <div class="input-wrap"><label for="safariGoal">What draws you to Africa?</label><select id="safariGoal" name="goal"><option value="Great Migration River Crossings">Great Migration River Crossings</option><option value="Apex Predator Photography">Apex Predator Photography</option><option value="Romantic Bush Luxury Celebration">Romantic Bush Luxury Celebration</option><option value="Multi-Generational Private Family Tour">Multi-Generational Private Family Tour</option><option value="Big Five Classic Safari">Big Five Classic Safari</option><option value="Birding & Specialist Wildlife">Birding &amp; Specialist Wildlife</option><option value="Walking & Active Adventure">Walking &amp; Active Adventure</option><option value="Cultural Immersion & Community Visits">Cultural Immersion &amp; Community Visits</option><option value="Beach & Bush Combination">Beach &amp; Bush Combination</option><option value="Special Anniversary / Honeymoon">Special Anniversary / Honeymoon</option><option value="Bespoke East Africa Journey">Bespoke East Africa Journey</option><option value="Other (tell us below)">Other (tell us below)</option></select></div><div class="input-wrap" id="safariGoalOtherWrap" hidden><label for="safariGoalOther">Describe what draws you to Africa</label><input id="safariGoalOther" type="text" placeholder="e.g. proposal sunset dinner, conservation volunteering, film project"></div>
             <div class="input-wrap"><label for="clientNotes">Tell us more</label><textarea id="clientNotes" name="notes" rows="4" placeholder="Your dream sightings, dietary needs, mobility considerations, or special occasion…"></textarea></div>
@@ -569,11 +570,11 @@
     <i class="fa-brands fa-whatsapp"></i>
     <span class="chat-label">Chat Live with an Expert</span>
   </a>
-  <script src="site-config.js?v=5"></script>
-  <script src="currency.js?v=5"></script>
-  <script src="account-system.js?v=5"></script>
-  <script src="app.js?v=5"></script>
-  <script src="reviews.js?v=5"></script>
-  <script src="analytics.js?v=5"></script>
+  <script src="site-config.js?v=6"></script>
+  <script src="currency.js?v=6"></script>
+  <script src="account-system.js?v=6"></script>
+  <script src="app.js?v=6"></script>
+  <script src="reviews.js?v=6"></script>
+  <script src="analytics.js?v=6"></script>
 </body>
 </html>

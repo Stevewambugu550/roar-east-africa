@@ -212,6 +212,43 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleOtherField(luxuryTierSelect, luxuryTierOtherWrap);
     toggleOtherField(safariGoalSelect, safariGoalOtherWrap);
 
+    // Travel date pickers
+    const travelStart = document.getElementById('travelStart');
+    const travelEnd = document.getElementById('travelEnd');
+    const datesFlexible = document.getElementById('datesFlexible');
+    const todayIso = new Date().toISOString().slice(0, 10);
+    [travelStart, travelEnd].forEach((d) => { if (d) d.min = todayIso; });
+    datesFlexible?.addEventListener('change', () => {
+        [travelStart, travelEnd].forEach((d) => {
+            if (!d) return;
+            d.disabled = datesFlexible.checked;
+            if (datesFlexible.checked) d.value = '';
+        });
+    });
+    const syncDateRange = () => {
+        if (travelStart?.value && travelEnd?.value && travelEnd.value < travelStart.value) {
+            const tmp = travelStart.value;
+            travelStart.value = travelEnd.value;
+            travelEnd.value = tmp;
+        }
+    };
+    travelStart?.addEventListener('change', () => {
+        if (travelEnd) travelEnd.min = travelStart.value || todayIso;
+        syncDateRange();
+    });
+    travelEnd?.addEventListener('change', syncDateRange);
+
+    function readTargetDates() {
+        if (datesFlexible?.checked) return 'Dates flexible';
+        const fmt = (v) => new Date(`${v}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const s = travelStart?.value;
+        const e = travelEnd?.value;
+        if (s && e) return `${fmt(s)} → ${fmt(e)}`;
+        if (s) return `From ${fmt(s)}`;
+        if (e) return `Until ${fmt(e)}`;
+        return '';
+    }
+
     const leadForm = document.getElementById('safariLeadForm');
     leadForm?.addEventListener('submit', async event => {
         event.preventDefault();
@@ -224,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             brand: 'Roar East Africa',
             clientName: name,
             clientEmail: email,
-            targetDates: document.getElementById('travelDates').value.trim(),
+            targetDates: readTargetDates(),
             totalGuests: Number(document.getElementById('guestCount').value),
             tierPreference: document.getElementById('luxuryTier').value.includes('Other') && luxuryTierOther?.value.trim()
                 ? `${document.getElementById('luxuryTier').value}: ${luxuryTierOther.value.trim()}`

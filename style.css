@@ -790,3 +790,33 @@
     .deals-section { padding: 70px 5%; }
     .deals-grid { grid-template-columns: 1fr; }
 }
+
+/* Date pickers on dark planner form */
+.input-wrap input[type="date"] {
+    color-scheme: dark;
+    min-height: 47px;
+}
+.input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.8;
+}
+.input-wrap input[type="date"]:disabled {
+    opacity: 0.35;
+}
+.dates-flexible {
+    align-items: center;
+    align-self: end;
+    color: rgba(255, 255, 255, 0.65);
+    cursor: pointer;
+    display: flex;
+    font-size: 11.5px;
+    gap: 9px;
+    letter-spacing: 0.4px;
+    margin-bottom: 18px;
+    padding: 13px 0;
+}
+.dates-flexible input {
+    accent-color: var(--gold);
+    height: 15px;
+    width: 15px;
+}
