@@ -277,7 +277,7 @@ const statuses = new Set(['new', 'reviewing', 'contacted', 'proposal_sent', 'won
 function rateLimit(windowMs, max) {
     const attempts = new Map();
     return (req, res, next) => {
-        const key = req.ip;
+        const key = req.headers['x-nf-client-connection-ip'] || req.ip || 'unknown';
         const now = Date.now();
         const entry = attempts.get(key);
         if (!entry || entry.resetAt <= now) {
@@ -503,7 +503,7 @@ router.post('/leads', leadLimit, requireCustomer, async (req, res) => {
     `, [req.roarUser.id, clientName, clientEmail, clean(req.body.targetDates,200)||null, totalGuests,
         clean(req.body.tierPreference,150)||null, clean(req.body.primaryObjective,200)||null,
         clean(req.body.notes,3000)||null, req.body.marketingConsent===true,
-        Number.isFinite(Number(req.body.estimatedValue)) ? Number(req.body.estimatedValue) : null,
+        req.body.estimatedValue != null && Number.isFinite(Number(req.body.estimatedValue)) ? Number(req.body.estimatedValue) : null,
         clean(req.body.clientPhone,40)||null]);
     res.status(201).json({ success:true, lead:rows[0] });
 });
@@ -548,7 +548,9 @@ router.put('/admin/leads/:id', requireRoarAdmin, async (req, res) => {
         if (req.body[f] !== undefined) {
             index += 1;
             fields.push(`${f}=$${index}`);
-            values.push(f === 'total_guests' || f === 'estimated_value' ? Number(req.body[f]) : clean(req.body[f], 3000));
+            values.push((f === 'total_guests' || f === 'estimated_value')
+                ? (req.body[f] == null || req.body[f] === '' ? null : Number(req.body[f]))
+                : clean(req.body[f], 3000));
         }
     });
     if (!fields.length) return res.status(400).json({ message: 'No fields to update.' });

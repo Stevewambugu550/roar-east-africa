@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Dates
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const _now = new Date();
+    const todayIso = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
     [startEl, endEl].forEach(d => { d.min = todayIso; });
     flexibleEl.addEventListener('change', () => {
         [startEl, endEl].forEach(d => { d.disabled = flexibleEl.checked; if (flexibleEl.checked) d.value = ''; });
@@ -115,9 +116,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Prefill from signed-in account + draft restore
+    const accountLink = document.getElementById('bkAccountLink');
     if (account?.isAuthenticated()) {
-        document.getElementById('bkName').value = `${account.user.firstName} ${account.user.lastName}`;
-        document.getElementById('bkEmail').value = account.user.email;
+        document.getElementById('bkName').value = `${account.user.firstName || ''} ${account.user.lastName || ''}`.trim();
+        document.getElementById('bkEmail').value = account.user.email || '';
+        if (accountLink) accountLink.textContent = `Signed in as ${account.user.firstName || account.user.email}`;
+    } else if (accountLink) {
+        accountLink.innerHTML = '<a href="account.html" style="color:var(--gold)">Sign in</a> to submit your request';
     }
     try {
         const draft = JSON.parse(sessionStorage.getItem('roar_booking_draft') || 'null');
@@ -164,7 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = event.target;
         if (!form.reportValidity()) return;
         saveDraft();
-        if (!account?.requireAccount(`${window.location.origin}${window.location.pathname}?trip=${selectedTrip.id}`)) return;
+        if (!account) { msg.textContent = 'Account system unavailable — please refresh the page.'; msg.className = 'err'; return; }
+        if (!account.requireAccount(`${window.location.origin}${window.location.pathname}?trip=${selectedTrip.id}`)) return;
 
         const opt = selectedTrip.options[Number(optionSelect.value)] || selectedTrip.options[0];
         const usd = usdOf(opt);
@@ -203,10 +209,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: account.headers(),
                 body: JSON.stringify(brief),
             });
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401 || res.status === 403) {
+                account.clear();
+                saveDraft();
+                window.location.href = `account.html?return=${encodeURIComponent(`${window.location.origin}${window.location.pathname}?trip=${selectedTrip.id}`)}`;
+                return;
+            }
             if (!res.ok) throw new Error(data.message || 'Unable to submit your booking request.');
             sessionStorage.removeItem('roar_booking_draft');
             form.reset();
+            [startEl, endEl].forEach(d => { d.disabled = false; });
+            optionSelect.innerHTML = '<option value="">Select a trip first</option>';
             selectedTrip = null;
             renderTrips();
             updateSummary();
@@ -215,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             msg.textContent = error.message;
             msg.className = 'err';
+            msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Request This Booking <i class="fa-solid fa-arrow-right"></i>';

@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentEstimate = null;
 
     function getTotalGuests() {
-        return Math.min(Math.max(Number(calcGuests?.value) || 2, 1), 100);
+        return Math.min(Math.max(Number(calcGuests?.value) || 2, 1), 30);
     }
 
     const customNightlyRates = {
@@ -216,7 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const travelStart = document.getElementById('travelStart');
     const travelEnd = document.getElementById('travelEnd');
     const datesFlexible = document.getElementById('datesFlexible');
-    const todayIso = new Date().toISOString().slice(0, 10);
+    const _now = new Date();
+    const todayIso = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
     [travelStart, travelEnd].forEach((d) => { if (d) d.min = todayIso; });
     datesFlexible?.addEventListener('change', () => {
         [travelStart, travelEnd].forEach((d) => {
@@ -253,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
     leadForm?.addEventListener('submit', async event => {
         event.preventDefault();
         if (!leadForm.reportValidity()) return;
-        if (!account?.requireAccount(`${window.location.origin}${window.location.pathname}#planner`)) return;
+        if (!account) { alert('Account system unavailable — please refresh the page.'); return; }
+        if (!account.requireAccount(`${window.location.origin}${window.location.pathname}#planner`)) return;
 
         const name = document.getElementById('clientName').value.trim();
         const email = document.getElementById('clientEmail').value.trim();
@@ -286,9 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: account.headers(),
                 body: JSON.stringify(brief),
             });
-            const data = await response.json();
-            if (response.status === 401) {
-                account.logout();
+            const data = await response.json().catch(() => ({}));
+            if (response.status === 401 || response.status === 403) {
+                account.clear();
+                window.location.href = `account.html?return=${encodeURIComponent(`${window.location.origin}${window.location.pathname}#planner`)}`;
                 return;
             }
             if (!response.ok) throw new Error(data.message || 'Unable to submit your inquiry.');
